@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DocPilot — Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .lang-flags { display: flex; gap: 6px; align-items: center; }
+    .lang-flag {
+      font-size: 22px;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 8px;
+      opacity: 0.35;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+      line-height: 1;
+      background: transparent;
+    }
+    .lang-flag:hover { opacity: 0.8; background: var(--surface2); border-color: var(--border); transform: scale(1.05); }
+    .lang-flag.active { opacity: 1; background: var(--surface2); border-color: var(--border2); }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">Doc<span>Pilot</span></div>
+    <div style="display:flex; gap:12px; align-items:center;">
+      <a href="index.html" class="btn btn-secondary" id="nav-home">🏠 Home</a>
+      <a href="history.html" class="btn btn-secondary" id="nav-history">📋 Storico</a>
+
+      <!-- Selettore lingua -->
+      <div class="lang-flags" id="lang-flags">
+        <span class="lang-flag" onclick="setLang('it')" data-lang="it" title="Italiano">🇮🇹</span>
+        <span class="lang-flag" onclick="setLang('en')" data-lang="en" title="English">🇬🇧</span>
+        <span class="lang-flag" onclick="setLang('es')" data-lang="es" title="Español">🇪🇸</span>
+        <span class="lang-flag" onclick="setLang('fr')" data-lang="fr" title="Français">🇫🇷</span>
+        <span class="lang-flag" onclick="setLang('de')" data-lang="de" title="Deutsch">🇩🇪</span>
+      </div>
+    </div>
+    <div class="user-info">
+      <img id="avatar" src="" alt="avatar" style="display:none" />
+      <span id="username">...</span>
+      <button class="btn btn-secondary" id="nav-logout" onclick="logout()">Esci</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1 class="page-title" id="page-title">I tuoi repository</h1>
+    <p class="page-subtitle" id="page-subtitle">Seleziona un repo e genera la documentazione con un click.</p>
+
+    <div id="repo-grid" class="repo-grid">
+      <div class="empty-state">
+        <div class="icon">⏳</div>
+        <h3 id="loading-text">Caricamento...</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal output documentazione -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <button class="close-btn" onclick="closeModal()">✕</button>
+      <h2 id="modal-title">Documentazione generata</h2>
+      <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+        <button class="btn btn-secondary" id="btn-copy" onclick="copyDoc()">📋 Copia</button>
+        <button class="btn btn-secondary" id="btn-download" onclick="downloadDoc()">⬇️ Scarica</button>
+        <button class="btn btn-primary" id="push-btn" onclick="pushToGitHub()" style="display:none;">🚀 Push su GitHub</button>
+      </div>
+      <div class="doc-output" id="doc-output"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

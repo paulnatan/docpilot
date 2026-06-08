@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DocPilot — La documentazione si scrive da sola</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #060910;
+      --surface: #0d1117;
+      --surface2: #161b22;
+      --border: #21262d;
+      --border2: #30363d;
+      --green: #3fb950;
+      --green-glow: rgba(63, 185, 80, 0.15);
+      --green-dim: rgba(63, 185, 80, 0.6);
+      --blue: #58a6ff;
+      --purple: #bc8cff;
+      --text: #e6edf3;
+      --text-muted: #7d8590;
+      --text-subtle: #484f58;
+      --font: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      overflow-x: hidden;
+    }
+
+    /* ─── NOISE TEXTURE ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── GLOW BG ─── */
+    .bg-glow {
+      position: fixed;
+      width: 800px;
+      height: 800px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.07;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .bg-glow-1 { background: #3fb950; top: -200px; left: -200px; }
+    .bg-glow-2 { background: #58a6ff; bottom: -200px; right: -200px; }
+
+    /* ─── NAVBAR ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 48px;
+      background: rgba(6, 9, 16, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+    .nav-logo span { color: var(--green); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--green);
+      color: #000 !important;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 600 !important;
+      font-size: 14px !important;
+      transition: opacity 0.2s !important;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green-glow);
+      border: 1px solid rgba(63, 185, 80, 0.3);
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--green);
+      margin-bottom: 32px;
+      animation: fadeInDown 0.6s ease both;
+    }
+
+    .hero-badge .dot {
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero h1 {
+      font-size: clamp(40px, 6vw, 80px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin-bottom: 24px;
+      animation: fadeInDown 0.6s ease 0.1s both;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--green) 0%, var(--blue) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--text-muted);
+      max-width: 580px;
+      line-height: 1.7;
+      margin-bottom: 40px;
+      font-weight: 400;
+      animation: fadeInDown 0.6s ease 0.2s both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeInDown 0.6s ease 0.3s both;
+      margin-bottom: 80px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--green);
+      color: #000;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: 0 0 30px rgba(63, 185, 80, 0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 50px rgba(63, 185, 80, 0.5);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--text);
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid var(--border2);
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      background: var(--surface2);
+      border-color: var(--text-subtle);
+    }
+
+    /* ─── TERMINAL MOCKUP ─── */
+    .terminal-wrapper {
+      width: 100%;
+      max-width: 760px;
+      animation: fadeInUp 0.8s ease 0.4s both;
+    }
+
+    .terminal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
+    }
+
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .terminal-dot:nth-child(1) { background: #ff5f57; }
+    .terminal-dot:nth-child(2) { background: #febc2e; }
+    .terminal-dot:nth-child(3) { background: #28c840; }
+
+    .terminal-title {
+      margin-left: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+    }
+
+    .terminal-body {
+      padding: 24px;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .t-comment { color: var(--text-subtle); }
+    .t-command { color: var(--text-muted); }
+    .t-command::before { content: '$ '; color: var(--green); }
+    .t-output { color: var(--text-muted); padding-left: 16px; }
+    .t-success { color: var(--green); }
+    .t-info { color: var(--blue); }
+    .t-highlight { color: var(--text); font-weight: 500; }
+    .t-blank { height: 8px; }
+
+    /* ─── SECTION ─── */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 100px 24px;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 17px;
+      color: var(--text-muted);
+      max-width: 520px;
+      line-height: 1.7;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ─── HOW IT WORKS ─── */
+    .how-it-works {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 56px;
+    }
+
+    .step {
+      background: var(--surface);
+      padding: 32px;
+      position: relative;
+    }
+
+    .step-num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      margin-bottom: 16px;
+      font-family: var(--mono);
+    }
+
+    .step-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+
+    .step h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .step-arrow {
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-subtle);
+      font-size: 20px;
+      z-index: 2;
+    }
+
+    /* ─── FEATURES ─── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 56px;
+    }
+
+    .feature {
+      background: var(--bg);
+      padding: 36px;
+      transition: background 0.2s;
+    }
+
+    .feature:hover { background: var(--surface); }
+
+    .feature-icon {
+      width: 44px; height: 44px;
+      background: var(--green-glow);
+      border: 1px solid rgba(63, 185, 80, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .feature h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .feature p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ─── PRICING ─── */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 56px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .pricing-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 36px;
+      position: relative;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .pricing-card.featured {
+      border-color: var(--green);
+      box-shadow: 0 0 40px rgba(63, 185, 80, 0.1);
+    }
+
+    .pricing-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green);
+      color: #000;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+
+    .pricing-plan {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .pricing-price {
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: -2px;
+      margin-bottom: 4px;
+    }
+
+    .pricing-price sup {
+      font-size: 20px;
+      font-weight: 600;
+      vertical-align: super;
+    }
+
+    .pricing-period {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    .pricing-features {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .pricing-features li {
+      font-size: 14px;
+      color: var(--text-muted);
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pricing-features li::before {
+      content: '✓';
+      color: var(--green);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .pricing-btn {
+      display: block;
+      text-align: center;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .pricing-btn-outline {
+      border: 1px solid var(--border2);
+      color: var(--text);
+    }
+    .pricing-btn-outline:hover { background: var(--surface2); }
+
+    .pricing-btn-green {
+      background: var(--green);
+      color: #000;
+      box-shadow: 0 0 20px rgba(63, 185, 80, 0.3);
+    }
+    .pricing-btn-green:hover { opacity: 0.85; }
+
+    /* ─── SOCIAL PROOF ─── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 56px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .stat {
+      background: var(--surface);
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 40px;
+      font-weight: 900;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ─── FOOTER CTA ─── */
+    .footer-cta {
+      text-align: center;
+      padding: 120px 24px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-cta h2 {
+      font-size: clamp(32px, 5vw, 64px);
+      font-weight: 900;
+      letter-spacing: -2px;
+      margin-bottom: 20px;
+    }
+
+    .footer-cta p {
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      padding: 40px 48px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-subtle);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── TICKER ─── */
+    .ticker-wrap {
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      padding: 14px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .ticker {
+      display: flex;
+      gap: 48px;
+      animation: ticker 20s linear infinite;
+      white-space: nowrap;
+    }
+
+    .ticker-item {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ticker-item span { color: var(--green); }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ─── CODE DIFF ─── */
+    .diff {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      overflow: hidden;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .diff-bar {
+      padding: 10px 16px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .diff-body { padding: 16px; }
+    .diff-add { color: var(--green); }
+    .diff-add::before { content: '+ '; }
+    .diff-remove { color: #f85149; }
+    .diff-remove::before { content: '- '; }
+    .diff-neutral { color: var(--text-muted); padding-left: 14px; }
+
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      footer { flex-direction: column; gap: 12px; text-align: center; }
+      .stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-logo">Doc<span>Pilot</span></div>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="#come-funziona" id="nav-how">Come funziona</a></li>
+    <li><a href="#features" id="nav-features">Funzionalità</a></li>
+    <li><a href="#prezzi" id="nav-pricing">Prezzi</a></li>
+    <li>
+      <div style="position:relative; display:inline-block;" id="lang-selector-wrap">
+        <button id="lang-btn" onclick="toggleLangMenu()" style="display:flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--border2);border-radius:6px;padding:6px 12px;color:var(--text);font-size:13px;cursor:pointer;">🇮🇹 IT ▾</button>
+        <div id="lang-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;overflow:hidden;z-index:200;min-width:140px;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+          <div onclick="setLang('it')" style="display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;cursor:pointer;color:var(--text-muted);" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background=''">🇮🇹 Italiano</div>
+          <div onclick="setLang('en')" style="display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;cursor:pointer;color:var(--text-muted);" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background=''">🇬🇧 English</div>
+          <div onclick="setLang('es')" style="display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;cursor:pointer;color:var(--text-muted);" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background=''">🇪🇸 Español</div>
+          <div onclick="setLang('fr')" style="display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;cursor:pointer;color:var(--text-muted);" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background=''">🇫🇷 Français</div>
+          <div onclick="setLang('de')" style="display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;cursor:pointer;color:var(--text-muted);" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background=''">🇩🇪 Deutsch</div>
+        </div>
+      </div>
+    </li>
+    <li><a href="#" class="nav-cta" id="nav-cta" onclick="openProviderModal(event)">Inizia gratis</a></li>
+  </ul>
+</nav>
+
+<!-- PROVIDER PICKER MODAL -->
+<div id="provider-modal" onclick="if(event.target===this)closeProviderModal()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:32px 28px;width:360px;max-width:90vw;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:6px;text-align:center;" id="modal-provider-title">Scegli come accedere</h3>
+    <p style="font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:24px;" id="modal-provider-sub">Connetti il tuo account Git in un click</p>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <a href="http://localhost:8000/auth/login/github" style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;text-decoration:none;color:var(--text);font-weight:600;font-size:14px;transition:all 0.2s;" onmouseover="this.style.borderColor='#58a6ff';this.style.background='#0d1520'" onmouseout="this.style.borderColor='var(--border2)';this.style.background='var(--surface2)'">
+        <svg height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span id="btn-login-github">Continua con GitHub</span>
+        <span style="margin-left:auto;font-size:12px;color:var(--text-muted);">100M utenti</span>
+      </a>
+      <a href="http://localhost:8000/auth/login/gitlab" style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;text-decoration:none;color:var(--text);font-weight:600;font-size:14px;transition:all 0.2s;" onmouseover="this.style.borderColor='#fc6d26';this.style.background='#160d07'" onmouseout="this.style.borderColor='var(--border2)';this.style.background='var(--surface2)'">
+        <svg height="24" viewBox="0 0 380 380" fill="#fc6d26"><path d="M282.83 170.73l-.27-.69-26.14-68.22a6.81 6.81 0 00-2.57-3.15 7 7 0 00-8.56.43 7 7 0 00-2.32 3.53l-17.65 54H154.29l-17.65-54a6.86 6.86 0 00-2.32-3.53 7 7 0 00-8.56-.43 6.87 6.87 0 00-2.57 3.15L97.44 170l-.27.69a48.34 48.34 0 0016 55.92l.09.07.24.17 39.82 29.82 19.7 14.91 12 9.06a8.07 8.07 0 009.76 0l12-9.06 19.7-14.91 40.06-30 .1-.08a48.35 48.35 0 0016.03-55.86z"/></svg>
+        <span id="btn-login-gitlab">Continua con GitLab</span>
+        <span style="margin-left:auto;font-size:12px;color:var(--text-muted);">Enterprise</span>
+      </a>
+      <a href="http://localhost:8000/auth/login/bitbucket" style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;text-decoration:none;color:var(--text);font-weight:600;font-size:14px;transition:all 0.2s;" onmouseover="this.style.borderColor='#2684ff';this.style.background='#070d1a'" onmouseout="this.style.borderColor='var(--border2)';this.style.background='var(--surface2)'">
+        <svg height="24" viewBox="0 0 32 32" fill="#2684ff"><path d="M2 4a2 2 0 00-2 2.31L4.31 26a2 2 0 001.96 1.62h19.56A2 2 0 0027.78 26L32 6.31A2 2 0 0030 4zm18.08 14.39h-8.18l-2.09-9.39h12.34z"/></svg>
+        <span id="btn-login-bitbucket">Continua con Bitbucket</span>
+        <span style="margin-left:auto;font-size:12px;color:var(--text-muted);">Atlassian</span>
+      </a>
+    </div>
+    <p style="margin-top:20px;text-align:center;font-size:12px;color:var(--text-subtle);">🔒 Leggiamo solo il codice. Non modifichiamo nulla senza tua conferma.</p>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">
+    <div class="dot"></div>
+    <span id="hero-badge"></span>
+  </div>
+
+  <h1 id="hero-title"></h1>
+  <p id="hero-sub"></p>
+
+  <div class="hero-actions">
+    <a href="#" class="btn-primary" id="hero-cta" onclick="openProviderModal(event)">
+      <svg height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    </a>
+    <a href="#come-funziona" class="btn-secondary" id="hero-how"></a>
+  </div>
+
+  <!-- Terminal -->
+  <div class="terminal-wrapper">
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+        <span class="terminal-title" id="terminal-title"></span>
+      </div>
+      <div class="terminal-body">
+        <div class="t-comment" id="t1"></div>
+        <div class="t-blank"></div>
+        <div class="t-command">git push origin main</div>
+        <div class="t-blank"></div>
+        <div class="t-output t-info" id="t2"></div>
+        <div class="t-output" id="t3"></div>
+        <div class="t-output" id="t4"></div>
+        <div class="t-output t-info" id="t5"></div>
+        <div class="t-blank"></div>
+        <div class="t-output t-success" id="t6"></div>
+        <div class="t-output t-success" id="t7"></div>
+        <div class="t-output t-success" id="t8"></div>
+        <div class="t-output t-success" id="t9"></div>
+        <div class="t-blank"></div>
+        <div class="t-output t-highlight" id="t10"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <div class="ticker-item">📄 README automatico <span>✓</span></div>
+    <div class="ticker-item">🔌 API Docs <span>✓</span></div>
+    <div class="ticker-item">📋 Changelog <span>✓</span></div>
+    <div class="ticker-item">💬 Commenti inline <span>✓</span></div>
+    <div class="ticker-item">⚡ Trigger su ogni push <span>✓</span></div>
+    <div class="ticker-item">🔗 GitHub · GitLab · Bitbucket <span>✓</span></div>
+    <div class="ticker-item">🤖 Powered by AI <span>✓</span></div>
+    <div class="ticker-item">📄 README automatico <span>✓</span></div>
+    <div class="ticker-item">🔌 API Docs <span>✓</span></div>
+    <div class="ticker-item">📋 Changelog <span>✓</span></div>
+    <div class="ticker-item">💬 Commenti inline <span>✓</span></div>
+    <div class="ticker-item">⚡ Trigger su ogni push <span>✓</span></div>
+    <div class="ticker-item">🔗 GitHub · GitLab · Bitbucket <span>✓</span></div>
+    <div class="ticker-item">🤖 Powered by AI <span>✓</span></div>
+  </div>
+</div>
+
+<!-- COME FUNZIONA -->
+<section class="how-it-works" id="come-funziona">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Come funziona</div>
+      <h2 class="section-title">Setup in 2 minuti.<br/>Documentazione per sempre.</h2>
+      <p class="section-sub">Connetti GitHub, GitLab o Bitbucket una volta sola. DocPilot fa il resto ad ogni commit.</p>
+    </div>
+
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-icon">🔗</div>
+        <h3>Connetti il tuo Git</h3>
+        <p>Login con OAuth in un click: GitHub, GitLab o Bitbucket. Seleziona i repository da documentare.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-icon">⚡</div>
+        <h3>Push & Forget</h3>
+        <p>Ad ogni push, il webhook di DocPilot si attiva automaticamente in background.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-icon">🤖</div>
+        <h3>AI al lavoro</h3>
+        <p>L'AI analizza il codice e genera README, API docs e Changelog completi.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-icon">✅</div>
+        <h3>Pronto nel tuo repo</h3>
+        <p>La documentazione viene pushata direttamente nel tuo repository. Zero sforzo, qualsiasi piattaforma.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="reveal" style="text-align:center; margin-bottom: 0;">
+      <div class="section-label">Funzionalità</div>
+      <h2 class="section-title">Tutto quello che serve.<br/>Niente di superfluo.</h2>
+    </div>
+
+    <div class="features-grid reveal">
+      <div class="feature">
+        <div class="feature-icon">📄</div>
+        <h3>README professionale</h3>
+        <p>Struttura del progetto, istruzioni di installazione, dipendenze e esempi d'uso generati automaticamente dal codice.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔌</div>
+        <h3>API Documentation</h3>
+        <p>Ogni endpoint documentato con metodo, parametri, schema di risposta ed esempi pratici. Sempre aggiornato.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📋</div>
+        <h3>Changelog automatico</h3>
+        <p>Ogni commit trasformato in una voce di changelog categorizzata: feature, bugfix, breaking changes.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">💬</div>
+        <h3>Commenti inline</h3>
+        <p>Seleziona un file e l'AI aggiunge commenti intelligenti su ogni funzione, classe e blocco di logica complessa.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🚀</div>
+        <h3>Push nel repository</h3>
+        <p>La documentazione viene scritta direttamente nel tuo repo come file Markdown — su GitHub, GitLab o Bitbucket. Sempre in sync col codice.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🌐</div>
+        <h3>Multi-linguaggio</h3>
+        <p>Python, JavaScript, TypeScript, Dart, Swift, Kotlin, Go, Java, PHP e molto altro. Se è codice, lo documentiamo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONFRONTO -->
+<section style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <div class="reveal" style="text-align: center; margin-bottom: 56px;">
+      <div class="section-label">Perché DocPilot</div>
+      <h2 class="section-title">Prima e dopo.</h2>
+      <p class="section-sub" style="margin: 0 auto;">Quello che succede quando smetti di scrivere documentazione a mano.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;" class="reveal">
+      <div class="diff">
+        <div class="diff-bar">❌ Senza DocPilot</div>
+        <div class="diff-body">
+          <div class="diff-remove">README.md vuoto o assente</div>
+          <div class="diff-remove">Nessun changelog aggiornato</div>
+          <div class="diff-remove">API docs obsolete</div>
+          <div class="diff-remove">Ore perse a scrivere docs</div>
+          <div class="diff-remove">Onboarding lento del team</div>
+          <div class="diff-remove">Codice senza commenti</div>
+        </div>
+      </div>
+      <div class="diff">
+        <div class="diff-bar">✅ Con DocPilot</div>
+        <div class="diff-body">
+          <div class="diff-add">README sempre aggiornato</div>
+          <div class="diff-add">Changelog ad ogni push</div>
+          <div class="diff-add">API docs sempre in sync</div>
+          <div class="diff-add">Zero tempo speso in docs</div>
+          <div class="diff-add">Onboarding immediato</div>
+          <div class="diff-add">Codice auto-commentato</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="prezzi">
+  <div class="container" style="text-align: center;">
+    <div class="reveal">
+      <div class="section-label">Prezzi</div>
+      <h2 class="section-title">Semplice. Trasparente.<br/>Senza sorprese.</h2>
+      <p class="section-sub" style="margin: 0 auto;">Inizia gratis. Scala quando sei pronto.</p>
+    </div>
+
+    <div class="pricing-grid reveal">
+      <div class="pricing-card">
+        <div class="pricing-plan">Free</div>
+        <div class="pricing-price">€<span>0</span></div>
+        <div class="pricing-period">per sempre</div>
+        <ul class="pricing-features">
+          <li>1 repository</li>
+          <li>README automatico</li>
+          <li>Changelog base</li>
+          <li>Storico 7 giorni</li>
+        </ul>
+        <a href="#" class="pricing-btn pricing-btn-outline" onclick="openProviderModal(event)">Inizia gratis</a>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Più popolare</div>
+        <div class="pricing-plan">Pro</div>
+        <div class="pricing-price">€<span>19</span></div>
+        <div class="pricing-period">al mese</div>
+        <ul class="pricing-features">
+          <li>Repository illimitati</li>
+          <li>README + API Docs + Changelog</li>
+          <li>Commenti inline AI</li>
+          <li>Push automatico nel repository</li>
+          <li>Storico illimitato</li>
+          <li>Supporto prioritario</li>
+        </ul>
+        <a href="#" class="pricing-btn pricing-btn-green" onclick="openProviderModal(event)">Inizia Pro</a>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-plan">Team</div>
+        <div class="pricing-price">€<span>49</span></div>
+        <div class="pricing-period">al mese</div>
+        <ul class="pricing-features">
+          <li>Tutto di Pro</li>
+          <li>Fino a 10 utenti</li>
+          <li>Dashboard team</li>
+          <li>GitLab + Bitbucket</li>
+          <li>SLA garantito</li>
+        </ul>
+        <a href="http://localhost:8000/auth/login" class="pricing-btn pricing-btn-outline">Contattaci</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER CTA -->
+<div class="footer-cta reveal">
+  <h2>Smetti di rimandare.<br/>La doc si scrive <span style="color: var(--green)">adesso.</span></h2>
+  <p id="footer-cta-sub">Connetti GitHub, GitLab o Bitbucket in 30 secondi. Il primo README è gratis.</p>
+  <a href="#" class="btn-primary" style="margin: 0 auto; display: inline-flex;" onclick="openProviderModal(event)">
+    🚀 <span id="footer-cta-btn">Inizia gratis</span>
+  </a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="nav-logo">Doc<span style="color: var(--green)">Pilot</span></div>
+  <div>© 2026 DocPilot. Fatto con ❤️ per i developer che odiano scrivere docs.</div>
+  <div style="display:flex; gap: 24px;">
+    <a href="#" style="color: var(--text-subtle); text-decoration:none;">Privacy</a>
+    <a href="#" style="color: var(--text-subtle); text-decoration:none;">Termini</a>
+    <a href="mailto:p.natan23@gmail.com" style="color: var(--text-subtle); text-decoration:none;">Contatti</a>
+  </div>
+</footer>
+
+<script src="js/i18n.js"></script>
+<script>
+  function applyLandingLang() {
+    const lang = getLang();
+    const flags = { it: "🇮🇹 IT", en: "🇬🇧 EN", es: "🇪🇸 ES", fr: "🇫🇷 FR", de: "🇩🇪 DE" };
+
+    // Navbar
+    document.getElementById("lang-btn").textContent = (flags[lang] || "🇮🇹 IT") + " ▾";
+    document.getElementById("nav-how").textContent = tl("nav_how");
+    document.getElementById("nav-features").textContent = tl("nav_features");
+    document.getElementById("nav-pricing").textContent = tl("nav_pricing");
+    document.getElementById("nav-cta").textContent = tl("nav_cta");
+
+    // Hero
+    document.getElementById("hero-badge").textContent = tl("badge");
+    document.getElementById("hero-title").innerHTML = tl("hero_title");
+    document.getElementById("hero-sub").textContent = tl("hero_sub");
+    const heroCta = document.getElementById("hero-cta");
+    heroCta.innerHTML = `<svg height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> ${tl("hero_cta")}`;
+    document.getElementById("hero-how").textContent = tl("hero_how");
+
+    // Terminal
+    document.getElementById("terminal-title").textContent = tl("terminal_title");
+    for (let i = 1; i <= 10; i++) document.getElementById("t"+i).textContent = tl("t"+i);
+  }
+
+  // ── Provider Modal ────────────────────────────────────────────────────────
+  function openProviderModal(e) {
+    if (e) e.preventDefault();
+    const modal = document.getElementById("provider-modal");
+    modal.style.display = "flex";
+    // Applica traduzioni al modal
+    const lang = getLang();
+    const titles = { it: "Scegli come accedere", en: "Choose how to sign in", es: "Elige cómo acceder", fr: "Choisissez comment vous connecter", de: "Wähle wie du dich anmeldest" };
+    const subs   = { it: "Connetti il tuo account Git in un click", en: "Connect your Git account in one click", es: "Conecta tu cuenta Git en un clic", fr: "Connectez votre compte Git en un clic", de: "Verbinde deinen Git-Account mit einem Klick" };
+    const gh     = { it: "Continua con GitHub", en: "Continue with GitHub", es: "Continuar con GitHub", fr: "Continuer avec GitHub", de: "Weiter mit GitHub" };
+    const gl     = { it: "Continua con GitLab", en: "Continue with GitLab", es: "Continuar con GitLab", fr: "Continuer avec GitLab", de: "Weiter mit GitLab" };
+    const bb     = { it: "Continua con Bitbucket", en: "Continue with Bitbucket", es: "Continuar con Bitbucket", fr: "Continuer avec Bitbucket", de: "Weiter mit Bitbucket" };
+    document.getElementById("modal-provider-title").textContent = titles[lang] || titles.en;
+    document.getElementById("modal-provider-sub").textContent   = subs[lang]   || subs.en;
+    document.getElementById("btn-login-github").textContent     = gh[lang]     || gh.en;
+    document.getElementById("btn-login-gitlab").textContent     = gl[lang]     || gl.en;
+    document.getElementById("btn-login-bitbucket").textContent  = bb[lang]     || bb.en;
+  }
+
+  function closeProviderModal() {
+    document.getElementById("provider-modal").style.display = "none";
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeProviderModal();
+  });
+
+  function toggleLangMenu() {
+    const menu = document.getElementById("lang-menu");
+    menu.style.display = menu.style.display === "none" ? "block" : "none";
+  }
+
+  document.addEventListener("click", (e) => {
+    if (!document.getElementById("lang-selector-wrap").contains(e.target)) {
+      document.getElementById("lang-menu").style.display = "none";
+    }
+  });
+
+  applyLandingLang();
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Navbar scroll effect
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    nav.style.borderBottomColor = window.scrollY > 20 ? 'var(--border2)' : 'var(--border)';
+  });
+</script>
+
+</body>
+</html>
