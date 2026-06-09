@@ -22,6 +22,30 @@ function applyTranslations() {
   }
 }
 
+async function startCheckout(plan) {
+  const token = getToken();
+  if (!token) { location.href = "index.html"; return; }
+  const btn = event ? event.target : null;
+  if (btn) { btn.textContent = "⏳ Caricamento..."; btn.disabled = true; }
+  try {
+    const res = await fetch(`${API}/payments/create-checkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ plan }),
+    });
+    const data = await res.json();
+    if (data.checkout_url) {
+      window.location.href = data.checkout_url;
+    } else {
+      showToast(data.detail || "Errore nel checkout", true);
+      if (btn) { btn.textContent = "🚀 Upgrade a Pro — €19/mese"; btn.disabled = false; }
+    }
+  } catch {
+    showToast("Errore di connessione. Riprova.", true);
+    if (btn) { btn.textContent = "🚀 Upgrade a Pro — €19/mese"; btn.disabled = false; }
+  }
+}
+
 async function init() {
   const user = await requireAuth();
   if (!user) return;
@@ -33,6 +57,13 @@ async function init() {
     const img = document.getElementById("avatar");
     img.src = user.avatar_url;
     img.style.display = "block";
+  }
+
+  // Mostra banner upgrade se piano Free
+  const plan = user.plan || "free";
+  if (plan === "free") {
+    const banner = document.getElementById("upgrade-banner");
+    if (banner) banner.style.display = "flex";
   }
 
   loadRepos();

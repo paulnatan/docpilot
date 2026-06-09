@@ -972,7 +972,7 @@
           <li>Storico illimitato</li>
           <li>Supporto prioritario</li>
         </ul>
-        <a href="#" class="pricing-btn pricing-btn-green" onclick="openProviderModal(event)">Inizia Pro</a>
+        <a href="#" class="pricing-btn pricing-btn-green" onclick="startCheckout('pro', event)">Inizia Pro</a>
       </div>
 
       <div class="pricing-card">
@@ -986,7 +986,7 @@
           <li>GitLab + Bitbucket</li>
           <li>SLA garantito</li>
         </ul>
-        <a href="http://localhost:8000/auth/login" class="pricing-btn pricing-btn-outline">Contattaci</a>
+        <a href="#" class="pricing-btn pricing-btn-outline" onclick="startCheckout('team', event)">Inizia Team</a>
       </div>
     </div>
   </div>
@@ -1075,6 +1075,36 @@
       document.getElementById("lang-menu").style.display = "none";
     }
   });
+
+  // ── Stripe Checkout ──────────────────────────────────────────────────────
+  async function startCheckout(plan, e) {
+    if (e) e.preventDefault();
+    const token = localStorage.getItem("docpilot_token");
+    if (!token) {
+      // Non loggato → prima fai login
+      openProviderModal(e);
+      return;
+    }
+    const btn = e ? e.target : null;
+    if (btn) { btn.textContent = "⏳ Caricamento..."; btn.style.pointerEvents = "none"; }
+    try {
+      const res = await fetch(`https://docpilot-production-ff6b.up.railway.app/payments/create-checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        alert(data.detail || "Errore nel checkout");
+        if (btn) { btn.textContent = plan === "pro" ? "Inizia Pro" : "Inizia Team"; btn.style.pointerEvents = ""; }
+      }
+    } catch {
+      alert("Errore di connessione. Riprova.");
+      if (btn) { btn.textContent = plan === "pro" ? "Inizia Pro" : "Inizia Team"; btn.style.pointerEvents = ""; }
+    }
+  }
 
   applyLandingLang();
 
