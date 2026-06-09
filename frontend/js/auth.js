@@ -1,4 +1,4 @@
-const API = "http://localhost:8000";
+const API = "https://docpilot-production-ff6b.up.railway.app";
 
 function getToken() {
   return localStorage.getItem("docpilot_token") || new URLSearchParams(location.search).get("token");
