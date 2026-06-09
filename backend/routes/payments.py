@@ -60,7 +60,7 @@ async def create_checkout(request: CheckoutRequest, authorization: str = Header(
 
     try:
         session = stripe.checkout.Session.create(
-            payment_method_types=["card", "paypal", "sepa_debit", "satispay"],
+            payment_method_types=["card", "paypal", "sepa_debit"],
             mode="subscription",
             customer_email=user.get("email", ""),
             line_items=[{
