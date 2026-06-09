@@ -16,19 +16,20 @@ function applyTranslations() {
   document.getElementById("push-btn").textContent = t("btn_push");
 
   // Rigenera le card nella nuova lingua se già caricate
-  const grid = document.getElementById("repo-grid");
   if (window._loadedRepos && window._loadedRepos.length > 0) {
     renderRepos(window._loadedRepos);
   }
+  // Riapplica testi piano nella nuova lingua
+  if (window._currentPlan) setupPlanUI(window._currentPlan);
 }
 
 function setupPlanUI(plan) {
-  const plans = {
-    free:  { icon: "⚡", label: "FREE",  color: "#7d8590", bg: "rgba(125,133,144,0.15)", price: "Gratuito",    features: "• 1 repository\n• README + Changelog base\n• Storico 7 giorni" },
-    pro:   { icon: "🚀", label: "PRO",   color: "#3fb950", bg: "rgba(63,185,80,0.15)",  price: "€19/mese",    features: "• Repository illimitati\n• README + API Docs + Changelog + Overview + OpenAPI + SDK\n• Push automatico nel repo\n• Storico illimitato\n• Supporto prioritario" },
-    team:  { icon: "👥", label: "TEAM",  color: "#bc8cff", bg: "rgba(188,140,255,0.15)", price: "€49/mese",   features: "• Tutto di Pro\n• Fino a 10 utenti\n• Dashboard team condivisa\n• SLA garantito" },
+  const planColors = {
+    free:  { icon: "⚡", label: "FREE",  color: "#7d8590", bg: "rgba(125,133,144,0.15)", price: "€0" },
+    pro:   { icon: "🚀", label: "PRO",   color: "#3fb950", bg: "rgba(63,185,80,0.15)",  price: "€19/mese" },
+    team:  { icon: "👥", label: "TEAM",  color: "#bc8cff", bg: "rgba(188,140,255,0.15)", price: "€49/mese" },
   };
-  const p = plans[plan] || plans.free;
+  const p = planColors[plan] || planColors.free;
 
   // Badge navbar
   const badge = document.getElementById("plan-badge");
@@ -49,34 +50,47 @@ function setupPlanUI(plan) {
     if (b) b.style.display = "flex";
   }
 
-  // Modal
-  const icon = document.getElementById("plan-modal-icon");
-  const name = document.getElementById("plan-modal-name");
-  const price = document.getElementById("plan-modal-price");
-  const mbadge = document.getElementById("plan-modal-badge");
-  const features = document.getElementById("plan-modal-features");
-  const actions = document.getElementById("plan-modal-actions");
+  // Testi banner tradotti
+  const bt = document.getElementById("banner-free-title");
+  const bs = document.getElementById("banner-free-sub");
+  const pt = document.getElementById("banner-pro-title");
+  const ps = document.getElementById("banner-pro-sub");
+  if (bt) bt.textContent = t("banner_free_title");
+  if (bs) bs.textContent = t("banner_free_sub");
+  if (pt) pt.textContent = t("banner_pro_title");
+  if (ps) ps.textContent = t("banner_pro_sub");
 
-  if (icon) icon.textContent = p.icon;
-  if (name) name.textContent = "Piano " + p.label;
-  if (price) price.textContent = p.price + " · Rinnovo mensile automatico";
+  // Modal
+  const icon     = document.getElementById("plan-modal-icon");
+  const name     = document.getElementById("plan-modal-name");
+  const price    = document.getElementById("plan-modal-price");
+  const mbadge   = document.getElementById("plan-modal-badge");
+  const features = document.getElementById("plan-modal-features");
+  const actions  = document.getElementById("plan-modal-actions");
+  const mtitle   = document.querySelector("#plan-modal h3");
+
+  if (mtitle)   mtitle.textContent   = t("plan_modal_title");
+  if (icon)     icon.textContent     = p.icon;
+  if (name)     name.textContent     = t("plan_name_" + plan) || ("Piano " + p.label);
+  if (price)    price.textContent    = p.price + " · " + t("plan_renewal");
   if (mbadge) {
-    mbadge.textContent = plan === "free" ? "Attivo" : "✅ Abbonato";
+    mbadge.textContent   = plan === "free" ? t("plan_active") : t("plan_subscribed");
     mbadge.style.background = p.bg;
-    mbadge.style.color = p.color;
+    mbadge.style.color      = p.color;
   }
-  if (features) features.innerHTML = p.features.replace(/\n/g, "<br>");
+  if (features) features.innerHTML = t("plan_" + plan + "_features").replace(/\n/g, "<br>");
   if (actions) {
+    const support = `<a href="mailto:p.natan23@gmail.com" style="color:var(--green);">${t("plan_support")}</a>`;
     if (plan === "free") {
       actions.innerHTML = `
-        <button onclick="startCheckout('pro')" style="background:linear-gradient(135deg,#3fb950,#58a6ff);color:#fff;font-weight:800;font-size:15px;padding:12px;border-radius:8px;border:none;cursor:pointer;width:100%;">🚀 Passa a Pro — €19/mese</button>
-        <button onclick="startCheckout('team')" style="background:linear-gradient(135deg,#bc8cff,#58a6ff);color:#fff;font-weight:800;font-size:15px;padding:12px;border-radius:8px;border:none;cursor:pointer;width:100%;">👥 Passa a Team — €49/mese</button>`;
+        <button onclick="startCheckout('pro')"  style="background:linear-gradient(135deg,#3fb950,#58a6ff);color:#fff;font-weight:800;font-size:15px;padding:12px;border-radius:8px;border:none;cursor:pointer;width:100%;">${t("upgrade_pro_btn")}</button>
+        <button onclick="startCheckout('team')" style="background:linear-gradient(135deg,#bc8cff,#58a6ff);color:#fff;font-weight:800;font-size:15px;padding:12px;border-radius:8px;border:none;cursor:pointer;width:100%;">${t("upgrade_team_btn")}</button>`;
     } else if (plan === "pro") {
       actions.innerHTML = `
-        <button onclick="startCheckout('team')" style="background:linear-gradient(135deg,#bc8cff,#58a6ff);color:#fff;font-weight:800;font-size:15px;padding:12px;border-radius:8px;border:none;cursor:pointer;width:100%;">👥 Upgrade a Team — €49/mese</button>
-        <p style="font-size:12px;color:var(--text-muted);text-align:center;margin:4px 0 0;">Per disdire l'abbonamento contatta <a href="mailto:p.natan23@gmail.com" style="color:var(--green);">il supporto</a></p>`;
+        <button onclick="startCheckout('team')" style="background:linear-gradient(135deg,#bc8cff,#58a6ff);color:#fff;font-weight:800;font-size:15px;padding:12px;border-radius:8px;border:none;cursor:pointer;width:100%;">${t("upgrade_team_only_btn")}</button>
+        <p style="font-size:12px;color:var(--text-muted);text-align:center;margin:4px 0 0;">${t("plan_cancel_hint")} ${support}</p>`;
     } else if (plan === "team") {
-      actions.innerHTML = `<p style="font-size:13px;color:var(--text-muted);text-align:center;">Sei sul piano massimo! Per assistenza contatta <a href="mailto:p.natan23@gmail.com" style="color:var(--green);">il supporto</a>.</p>`;
+      actions.innerHTML = `<p style="font-size:13px;color:var(--text-muted);text-align:center;">${t("plan_max_hint")} ${support}.</p>`;
     }
   }
 }
@@ -120,6 +134,7 @@ async function init() {
 
   // Mostra badge piano + banner + popola modal
   const plan = user.plan || "free";
+  window._currentPlan = plan;
   setupPlanUI(plan);
 
 
