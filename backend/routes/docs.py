@@ -137,7 +137,7 @@ async def push_to_github(request: PushDocRequest, authorization: str = Header(..
         raise HTTPException(status_code=400, detail="Questo tipo di documentazione non può essere pushato")
 
     branch = request.branch or await provider.get_default_branch(request.repo_full_name)
-    commit_message = f"docs: aggiorna {file_path} con DocPilot 🤖"
+    commit_message = f"docs: aggiorna {file_path} con ReadyGen 🤖"
 
     await provider.push_file(
         repo_full_name=request.repo_full_name,

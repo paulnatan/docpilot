@@ -8,7 +8,7 @@ load_dotenv()
 from routes.auth import router as auth_router
 from routes.docs import router as docs_router
 
-app = FastAPI(title="DocForge API", version="1.0.0")
+app = FastAPI(title="ReadyGen API", version="1.0.0")
 
 # CORS: in produzione usa FRONTEND_URL, in locale accetta tutto
 frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
@@ -34,7 +34,7 @@ app.include_router(docs_router, prefix="/docs", tags=["docs"])
 
 @app.get("/")
 def root():
-    return {"service": "DocForge API", "version": "1.0.0", "status": "ok"}
+    return {"service": "ReadyGen API", "version": "1.0.0", "status": "ok"}
 
 
 @app.get("/health")

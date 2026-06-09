@@ -1,12 +1,12 @@
-# DocForge — Contesto del progetto
+# ReadyGen — Contesto del progetto
 
 Micro SaaS per la **generazione automatica di documentazione tecnica** da repository Git.
 Sviluppatore: Paolo Natan — `p.natan23@gmail.com`
 Cartella progetto: `/Users/paulblack/Desktop/Development/DocPilot`
 Avviato: 04/06/2026
 
-> ✅ Nome definitivo: **DocForge** — dominio `docforge.io` disponibile (ECONNREFUSED = nessun sito attivo).
-> Da acquistare prima del lancio pubblico (~€12/anno su Namecheap o Cloudflare).
+> ✅ Nome definitivo: **ReadyGen** — dominio `readygen.eu` scelto dall'utente.
+> Da acquistare prima del lancio pubblico (~€10/anno su Namecheap o Cloudflare).
 
 ---
 
@@ -15,7 +15,7 @@ Avviato: 04/06/2026
 Problema reale vissuto internamente: nei team di sviluppo la documentazione tecnica è sempre disorganizzata o assente.
 Il tool si connette al repository (GitHub, GitLab, Bitbucket), legge il codice ad ogni commit e genera automaticamente tutta la documentazione tecnica con AI.
 
-> "I developer odiano scrivere documentazione. DocForge la scrive al posto loro."
+> "I developer odiano scrivere documentazione. ReadyGen la scrive al posto loro."
 
 ---
 
@@ -32,7 +32,7 @@ Il tool si connette al repository (GitHub, GitLab, Bitbucket), legge il codice a
 ### URL produzione
 | Componente | URL |
 |---|---|
-| Frontend | https://docpilot-app.netlify.app (da rinominare in docforge) |
+| Frontend | https://docpilot-app.netlify.app (da rinominare in readygen) |
 | Backend | https://docpilot-production-ff6b.up.railway.app |
 | Repository | https://github.com/paulnatan/docpilot |
 | Database | Supabase — https://cmpoemzdiiuebwdxludz.supabase.co |
@@ -71,7 +71,7 @@ Pagamenti   → Stripe (da implementare)
 | Multi-lingua documentazione AI | ✅ IT, EN, ES, FR, DE |
 | Landing page professionale | ✅ |
 | Provider abstraction layer | ✅ |
-| Rebranding DocPilot → DocForge | ✅ |
+| Rebranding → ReadyGen | ✅ |
 
 ---
 
@@ -80,7 +80,7 @@ Pagamenti   → Stripe (da implementare)
 ### Priorità alta
 | Funzionalità | Difficoltà | Tempo stimato | Note |
 |---|---|---|---|
-| **Acquisto dominio docforge.io** | ⭐ Triviale | 15min | ~€12/anno su Namecheap o Cloudflare Registrar |
+| **Acquisto dominio readygen.eu** | ⭐ Triviale | 15min | ~€10/anno su Namecheap o Cloudflare Registrar |
 | **SDK Generation** | ⭐⭐ Facile | 2-3h | AI genera codice client JS/Python/Swift per chiamare le API |
 | **Swagger/OpenAPI export** | ⭐⭐ Facile | 2-3h | Genera file openapi.json/swagger.yaml dal codice |
 | **Stripe pagamenti** | ⭐⭐⭐ Medio | 4-6h | Piano Pro €19/mese, Team €49/mese |
@@ -90,7 +90,7 @@ Pagamenti   → Stripe (da implementare)
 | Funzionalità | Difficoltà | Tempo stimato | Note |
 |---|---|---|---|
 | **Mock Server** | ⭐⭐⭐ Medio | 4-6h | Server simulato per testare API senza backend |
-| **Rinominare Netlify** | ⭐ Triviale | 5min | Da docpilot-app a docforge-app |
+| **Rinominare Netlify** | ⭐ Triviale | 5min | Da docpilot-app a readygen-app |
 | **Migrazione Claude API** | ⭐⭐ Facile | 1h | Aumentare CHUNK_TOKEN_LIMIT da 8.000 a 50.000+ |
 | **n8n cloud** | ⭐⭐ Facile | 2h | Migrare n8n da locale a cloud per webhook stabili |
 | **GitLab credenziali** | ⭐ Triviale | 30min | Creare OAuth app su gitlab.com |
@@ -125,7 +125,7 @@ Break-even con soli **5 clienti Pro** (5 × €19 = €95 - €20 costi = €75 
 | Netlify (frontend) | €0 |
 | Supabase (database) | €0 → €25 con crescita |
 | Groq API (AI) | €0 free tier → migrazione Claude |
-| Dominio docforge.io | ~€1/mese |
+| Dominio readygen.eu | ~€1/mese |
 | Stripe | 2.9% + €0.30 per transazione |
 | **Totale MVP** | **€0-5/mese** |
 
@@ -146,8 +146,8 @@ Break-even con soli **5 clienti Pro** (5 × €19 = €95 - €20 costi = €75 
 ## 9. Marketing — piano lancio
 
 ```
-Step 1: Acquistare docforge.io
-Step 2: Aggiornare URL Netlify e Railway con dominio custom
+Step 1: Acquistare readygen.eu
+Step 2: Aggiornare URL Netlify (rinominare sito) e puntare dominio custom
 Step 3: Product Hunt launch (martedì/mercoledì 00:01 PST)
 Step 4: Reddit — r/webdev, r/programming, r/SideProject
 Step 5: Hacker News — Show HN
@@ -165,4 +165,4 @@ Step 8: GitHub Marketplace + GitLab Marketplace
 - **GITHUB_REDIRECT_URI**: `https://docpilot-production-ff6b.up.railway.app/auth/callback/github`
 - **Railway PORT**: il server gira su porta 8080 (assegnata da Railway via $PORT)
 - **Supabase migration v2**: eseguita — aggiunge colonne `provider`, `gitlab_id`, `bitbucket_id`
-- **localStorage keys**: `docpilot_token` e `docpilot_lang` (mantenute per retrocompatibilità)
+- **localStorage keys**: `docpilot_token` e `docpilot_lang` (mantenute per retrocompatibilità — cambiarle comporterebbe logout forzato di tutti gli utenti)
