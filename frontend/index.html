@@ -945,7 +945,8 @@
       <p class="section-sub" style="margin: 0 auto;">Inizia gratis. Scala quando sei pronto.</p>
     </div>
 
-    <div class="pricing-grid reveal">
+    <!-- Free card -->
+    <div class="pricing-grid reveal" style="grid-template-columns: 1fr; max-width: 340px; margin: 0 auto 48px;">
       <div class="pricing-card">
         <div class="pricing-plan">Free</div>
         <div class="pricing-price">€<span>0</span></div>
@@ -958,36 +959,48 @@
         </ul>
         <a href="#" class="pricing-btn pricing-btn-outline" onclick="openProviderModal(event)">Inizia gratis</a>
       </div>
+    </div>
 
-      <div class="pricing-card featured">
-        <div class="pricing-badge">Più popolare</div>
-        <div class="pricing-plan">Pro</div>
-        <div class="pricing-price">€<span>19</span></div>
-        <div class="pricing-period">al mese</div>
-        <ul class="pricing-features">
-          <li>Repository illimitati</li>
-          <li>README + API Docs + Changelog</li>
-          <li>Commenti inline AI</li>
-          <li>Push automatico nel repository</li>
-          <li>Storico illimitato</li>
-          <li>Supporto prioritario</li>
-        </ul>
-        <a href="#" class="pricing-btn pricing-btn-green" onclick="startCheckout('pro', event)">Inizia Pro</a>
+    <!-- Pro + Team images -->
+    <div class="reveal" style="display:flex; gap:32px; justify-content:center; align-items:flex-start; flex-wrap:wrap;">
+
+      <!-- Pro -->
+      <div style="position:relative; cursor:pointer;" onclick="startCheckout('pro', event)">
+        <div style="position:absolute;top:14px;right:14px;background:linear-gradient(135deg,#3fb950,#58a6ff);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:100px;z-index:2;letter-spacing:0.5px;">Più popolare</div>
+        <img src="images/AbbonamentoSingoloSito.png" alt="Piano Pro — €19/mese"
+          style="width:100%; max-width:340px; border-radius:18px; display:block;
+                 box-shadow: 0 8px 40px rgba(63,185,80,0.25), 0 2px 12px rgba(0,0,0,0.4);
+                 transition: transform 0.25s, box-shadow 0.25s;"
+          onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 56px rgba(63,185,80,0.4),0 4px 16px rgba(0,0,0,0.5)'"
+          onmouseout="this.style.transform='';this.style.boxShadow='0 8px 40px rgba(63,185,80,0.25),0 2px 12px rgba(0,0,0,0.4)'"
+        />
+        <div style="margin-top:16px; text-align:center;">
+          <a href="#" onclick="startCheckout('pro', event)"
+            style="display:inline-block;background:linear-gradient(135deg,#3fb950,#58a6ff);color:#fff;font-weight:800;font-size:16px;padding:13px 40px;border-radius:10px;text-decoration:none;box-shadow:0 0 24px rgba(63,185,80,0.35);transition:opacity 0.2s;"
+            onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+            🚀 Inizia Pro — €19/mese
+          </a>
+        </div>
       </div>
 
-      <div class="pricing-card">
-        <div class="pricing-plan">Team</div>
-        <div class="pricing-price">€<span>49</span></div>
-        <div class="pricing-period">al mese</div>
-        <ul class="pricing-features">
-          <li>Tutto di Pro</li>
-          <li>Fino a 10 utenti</li>
-          <li>Dashboard team</li>
-          <li>GitLab + Bitbucket</li>
-          <li>SLA garantito</li>
-        </ul>
-        <a href="#" class="pricing-btn pricing-btn-outline" onclick="startCheckout('team', event)">Inizia Team</a>
+      <!-- Team -->
+      <div style="cursor:pointer;" onclick="startCheckout('team', event)">
+        <img src="images/AbbonamentoTeamSito.png" alt="Piano Team — €49/mese"
+          style="width:100%; max-width:340px; border-radius:18px; display:block;
+                 box-shadow: 0 8px 40px rgba(188,140,255,0.25), 0 2px 12px rgba(0,0,0,0.4);
+                 transition: transform 0.25s, box-shadow 0.25s;"
+          onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 56px rgba(188,140,255,0.4),0 4px 16px rgba(0,0,0,0.5)'"
+          onmouseout="this.style.transform='';this.style.boxShadow='0 8px 40px rgba(188,140,255,0.25),0 2px 12px rgba(0,0,0,0.4)'"
+        />
+        <div style="margin-top:16px; text-align:center;">
+          <a href="#" onclick="startCheckout('team', event)"
+            style="display:inline-block;background:linear-gradient(135deg,#bc8cff,#58a6ff);color:#fff;font-weight:800;font-size:16px;padding:13px 40px;border-radius:10px;text-decoration:none;box-shadow:0 0 24px rgba(188,140,255,0.35);transition:opacity 0.2s;"
+            onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+            👥 Inizia Team — €49/mese
+          </a>
+        </div>
       </div>
+
     </div>
   </div>
 </section>
