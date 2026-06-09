@@ -42,6 +42,8 @@
     <div class="user-info">
       <img id="avatar" src="" alt="avatar" style="display:none" />
       <span id="username">...</span>
+      <!-- Badge piano -->
+      <span id="plan-badge" style="display:none; font-size:12px; font-weight:700; padding:4px 10px; border-radius:100px; cursor:pointer;" onclick="document.getElementById('plan-modal').style.display='flex'" title="Il tuo piano"></span>
       <button class="btn btn-secondary" id="nav-logout" onclick="logout()">Esci</button>
     </div>
   </nav>
@@ -90,6 +92,35 @@
         <button class="btn btn-primary" id="push-btn" onclick="pushToGitHub()" style="display:none;">🚀 Push su GitHub</button>
       </div>
       <div class="doc-output" id="doc-output"></div>
+    </div>
+  </div>
+
+  <!-- Modal Piano -->
+  <div id="plan-modal" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:32px;width:420px;max-width:92vw;box-shadow:0 24px 64px rgba(0,0,0,0.6);position:relative;">
+      <button onclick="document.getElementById('plan-modal').style.display='none'" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">✕</button>
+      <h3 style="font-size:20px;font-weight:800;margin-bottom:24px;">💳 Il tuo abbonamento</h3>
+
+      <!-- Info piano corrente -->
+      <div id="plan-info-box" style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:20px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+          <span id="plan-modal-icon" style="font-size:28px;"></span>
+          <div>
+            <div id="plan-modal-name" style="font-size:18px;font-weight:800;"></div>
+            <div id="plan-modal-price" style="font-size:13px;color:var(--text-muted);"></div>
+          </div>
+          <span id="plan-modal-badge" style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 10px;border-radius:100px;"></span>
+        </div>
+        <div id="plan-modal-features" style="font-size:13px;color:var(--text-muted);line-height:1.8;border-top:1px solid var(--border);padding-top:12px;margin-top:4px;"></div>
+      </div>
+
+      <!-- Rinnovo automatico -->
+      <div style="background:rgba(63,185,80,0.06);border:1px solid rgba(63,185,80,0.2);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--text-muted);margin-bottom:20px;">
+        🔄 <strong style="color:var(--text);">Rinnovo automatico</strong> — Stripe addebita automaticamente ogni mese. Se il pagamento fallisce, il piano torna a Free.
+      </div>
+
+      <!-- Bottoni azione -->
+      <div id="plan-modal-actions" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
   </div>
 

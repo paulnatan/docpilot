@@ -22,6 +22,65 @@ function applyTranslations() {
   }
 }
 
+function setupPlanUI(plan) {
+  const plans = {
+    free:  { icon: "⚡", label: "FREE",  color: "#7d8590", bg: "rgba(125,133,144,0.15)", price: "Gratuito",    features: "• 1 repository\n• README + Changelog base\n• Storico 7 giorni" },
+    pro:   { icon: "🚀", label: "PRO",   color: "#3fb950", bg: "rgba(63,185,80,0.15)",  price: "€19/mese",    features: "• Repository illimitati\n• README + API Docs + Changelog + Overview + OpenAPI + SDK\n• Push automatico nel repo\n• Storico illimitato\n• Supporto prioritario" },
+    team:  { icon: "👥", label: "TEAM",  color: "#bc8cff", bg: "rgba(188,140,255,0.15)", price: "€49/mese",   features: "• Tutto di Pro\n• Fino a 10 utenti\n• Dashboard team condivisa\n• SLA garantito" },
+  };
+  const p = plans[plan] || plans.free;
+
+  // Badge navbar
+  const badge = document.getElementById("plan-badge");
+  if (badge) {
+    badge.textContent = p.label;
+    badge.style.background = p.bg;
+    badge.style.color = p.color;
+    badge.style.border = `1px solid ${p.color}`;
+    badge.style.display = "inline-block";
+  }
+
+  // Banner
+  if (plan === "free") {
+    const b = document.getElementById("upgrade-banner");
+    if (b) b.style.display = "flex";
+  } else if (plan === "pro") {
+    const b = document.getElementById("pro-banner");
+    if (b) b.style.display = "flex";
+  }
+
+  // Modal
+  const icon = document.getElementById("plan-modal-icon");
+  const name = document.getElementById("plan-modal-name");
+  const price = document.getElementById("plan-modal-price");
+  const mbadge = document.getElementById("plan-modal-badge");
+  const features = document.getElementById("plan-modal-features");
+  const actions = document.getElementById("plan-modal-actions");
+
+  if (icon) icon.textContent = p.icon;
+  if (name) name.textContent = "Piano " + p.label;
+  if (price) price.textContent = p.price + " · Rinnovo mensile automatico";
+  if (mbadge) {
+    mbadge.textContent = plan === "free" ? "Attivo" : "✅ Abbonato";
+    mbadge.style.background = p.bg;
+    mbadge.style.color = p.color;
+  }
+  if (features) features.innerHTML = p.features.replace(/\n/g, "<br>");
+  if (actions) {
+    if (plan === "free") {
+      actions.innerHTML = `
+        <button onclick="startCheckout('pro')" style="background:linear-gradient(135deg,#3fb950,#58a6ff);color:#fff;font-weight:800;font-size:15px;padding:12px;border-radius:8px;border:none;cursor:pointer;width:100%;">🚀 Passa a Pro — €19/mese</button>
+        <button onclick="startCheckout('team')" style="background:linear-gradient(135deg,#bc8cff,#58a6ff);color:#fff;font-weight:800;font-size:15px;padding:12px;border-radius:8px;border:none;cursor:pointer;width:100%;">👥 Passa a Team — €49/mese</button>`;
+    } else if (plan === "pro") {
+      actions.innerHTML = `
+        <button onclick="startCheckout('team')" style="background:linear-gradient(135deg,#bc8cff,#58a6ff);color:#fff;font-weight:800;font-size:15px;padding:12px;border-radius:8px;border:none;cursor:pointer;width:100%;">👥 Upgrade a Team — €49/mese</button>
+        <p style="font-size:12px;color:var(--text-muted);text-align:center;margin:4px 0 0;">Per disdire l'abbonamento contatta <a href="mailto:p.natan23@gmail.com" style="color:var(--green);">il supporto</a></p>`;
+    } else if (plan === "team") {
+      actions.innerHTML = `<p style="font-size:13px;color:var(--text-muted);text-align:center;">Sei sul piano massimo! Per assistenza contatta <a href="mailto:p.natan23@gmail.com" style="color:var(--green);">il supporto</a>.</p>`;
+    }
+  }
+}
+
 async function startCheckout(plan) {
   const token = getToken();
   if (!token) { location.href = "index.html"; return; }
@@ -59,16 +118,10 @@ async function init() {
     img.style.display = "block";
   }
 
-  // Mostra banner in base al piano
+  // Mostra badge piano + banner + popola modal
   const plan = user.plan || "free";
-  if (plan === "free") {
-    const banner = document.getElementById("upgrade-banner");
-    if (banner) banner.style.display = "flex";
-  } else if (plan === "pro") {
-    const banner = document.getElementById("pro-banner");
-    if (banner) banner.style.display = "flex";
-  }
-  // Team: nessun banner (piano massimo)
+  setupPlanUI(plan);
+
 
   loadRepos();
 }
