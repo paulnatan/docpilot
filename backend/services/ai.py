@@ -217,6 +217,86 @@ Analisi parziali da unire:
 Crea un documento definitivo professionale. Ogni sezione deve avere almeno 4-6 punti dettagliati.
 """,
 
+    "openapi_chunk": """Sei un esperto di API design. Stai analizzando la PARTE {chunk_num} di {total_chunks} di un repository.
+
+Estrai da questo chunk TUTTI gli endpoint API trovati:
+- Metodo HTTP e path
+- Parametri (query, path, body)
+- Schema di risposta
+- Eventuali modelli di dati (classi, interfacce, tipi)
+
+Sii preciso e tecnico. Questo sarà usato per costruire una specifica OpenAPI completa.
+
+Repository: {repo_name}
+Chunk {chunk_num}/{total_chunks}:
+{file_contents}
+""",
+
+    "openapi_merge": """Sei un esperto di API design. Hai analizzato il repository {repo_name} in {total_chunks} parti.
+
+Combina tutte le analisi parziali in una specifica OpenAPI 3.0 COMPLETA e VALIDA in formato YAML.
+
+La specifica deve includere:
+- info (title, version, description)
+- servers
+- paths con TUTTI gli endpoint trovati nelle analisi parziali
+- Per ogni endpoint: summary, description, parameters, requestBody, responses con schema
+- components/schemas per tutti i modelli di dati trovati
+
+Restituisci SOLO il YAML valido, senza spiegazioni o markdown code block.
+
+Repository: {repo_name}
+Analisi parziali:
+{partial_docs}
+""",
+
+    "sdk_chunk": """Sei un esperto sviluppatore. Stai analizzando la PARTE {chunk_num} di {total_chunks} di un repository.
+
+Estrai da questo chunk:
+- Tutti gli endpoint API (metodo, path, parametri, risposta)
+- Modelli di dati / interfacce rilevanti
+- Logica di autenticazione se presente
+
+Sii preciso. Questo sarà usato per generare un SDK client completo.
+
+Repository: {repo_name}
+Chunk {chunk_num}/{total_chunks}:
+{file_contents}
+""",
+
+    "sdk_merge": """Sei un esperto sviluppatore. Hai analizzato il repository {repo_name} in {total_chunks} parti.
+
+Genera un SDK client COMPLETO in JavaScript/TypeScript e Python basandoti su tutte le analisi parziali.
+
+Per ogni linguaggio:
+1. Classe client con TUTTI i metodi per ogni endpoint trovato
+2. Tipi/interfacce TypeScript per tutti i modelli di dati
+3. Gestione degli errori
+4. Esempi d'uso per ogni metodo
+
+## JavaScript/TypeScript SDK
+```typescript
+// codice completo
+```
+
+## Python SDK
+```python
+# codice completo
+```
+
+## Esempi d'uso
+```typescript
+// esempi JS
+```
+```python
+# esempi Python
+```
+
+Repository: {repo_name}
+Analisi parziali:
+{partial_docs}
+""",
+
     "openapi": """Sei un esperto di API design. Analizza il codice seguente e genera una specifica OpenAPI 3.0 completa in formato YAML.
 
 La specifica deve includere:
@@ -336,8 +416,8 @@ def generate_doc(doc_type: str, repo_name: str, file_tree: str = "", file_conten
 
     lang_instruction = LANG_INSTRUCTIONS.get(lang, LANG_INSTRUCTIONS["it"])
 
-    # Per README e overview con contenuto grande → chunking automatico
-    if doc_type in ("readme", "overview") and len(file_contents) > CHUNK_SIZE_CHARS:
+    # Per doc type che supportano chunking → chunking automatico se il contenuto è grande
+    if doc_type in ("readme", "overview", "openapi", "sdk") and len(file_contents) > CHUNK_SIZE_CHARS:
         return _generate_with_chunks(repo_name, file_tree, file_contents, doc_type, lang_instruction)
 
     prompt_template = PROMPTS.get(doc_type)
