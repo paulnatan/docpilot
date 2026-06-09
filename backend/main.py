@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 import os
 
@@ -33,6 +34,18 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(docs_router, prefix="/docs", tags=["docs"])
 app.include_router(payments_router, prefix="/payments", tags=["payments"])
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Gestisce eccezioni non catturate aggiungendo sempre i CORS headers."""
+    origin = request.headers.get("origin", "")
+    allow_origin = origin if origin in origins else origins[0]
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Errore interno: {str(exc)}"},
+        headers={"Access-Control-Allow-Origin": allow_origin},
+    )
 
 
 @app.get("/")

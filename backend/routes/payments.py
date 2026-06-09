@@ -1,13 +1,17 @@
 import os
-import stripe
 from fastapi import APIRouter, HTTPException, Header, Request
+
+try:
+    import stripe
+    stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
+    STRIPE_AVAILABLE = True
+except ImportError:
+    STRIPE_AVAILABLE = False
 from pydantic import BaseModel
 from jose import jwt
 from db.supabase import get_client
 
 router = APIRouter()
-
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://readygen-app.netlify.app")
 
@@ -51,7 +55,7 @@ async def create_checkout(request: CheckoutRequest, authorization: str = Header(
     if not plan:
         raise HTTPException(status_code=400, detail="Piano non valido")
 
-    if not stripe.api_key:
+    if not STRIPE_AVAILABLE or not os.getenv("STRIPE_SECRET_KEY"):
         raise HTTPException(status_code=503, detail="Stripe non configurato")
 
     try:
@@ -72,7 +76,7 @@ async def create_checkout(request: CheckoutRequest, authorization: str = Header(
         )
         return {"checkout_url": session.url}
 
-    except stripe.error.StripeError as e:
+    except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
