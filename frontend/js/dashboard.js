@@ -165,7 +165,10 @@ async function generate(repoFullName, docType) {
   } catch (err) {
     if (loadingInterval) clearInterval(loadingInterval);
     closeModal();
-    showToast(err.message, true);
+    const msg = err.message === "Failed to fetch"
+      ? "Errore di connessione al server. Riprova tra qualche secondo."
+      : err.message;
+    showToast(msg, true);
   }
 }
 

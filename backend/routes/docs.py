@@ -50,7 +50,17 @@ async def generate(request: GenerateRequest, authorization: str = Header(...)):
         branch = request.branch or await provider.get_default_branch(request.repo_full_name)
         tree = await provider.get_repo_tree(request.repo_full_name, branch)
 
-        file_limit = 60 if request.doc_type == "overview" else MAX_FILES
+        # Limiti ridotti per sdk/openapi per non superare il token limit di Groq
+        if request.doc_type in ("sdk", "openapi"):
+            file_limit = 15
+            chars_per_file = 1500
+        elif request.doc_type == "overview":
+            file_limit = 60
+            chars_per_file = MAX_CHARS_PER_FILE
+        else:
+            file_limit = MAX_FILES
+            chars_per_file = MAX_CHARS_PER_FILE
+
         code_files = [
             item["path"] for item in tree
             if item["type"] == "blob"
@@ -63,7 +73,7 @@ async def generate(request: GenerateRequest, authorization: str = Header(...)):
         for path in code_files:
             content = await provider.get_file_content(request.repo_full_name, path)
             if content:
-                contents.append(f"### {path}\n```\n{content[:MAX_CHARS_PER_FILE]}\n```")
+                contents.append(f"### {path}\n```\n{content[:chars_per_file]}\n```")
         file_contents_str = "\n\n".join(contents)
 
     elif request.doc_type == "changelog":
