@@ -32,7 +32,7 @@ Il tool si connette al repository (GitHub, GitLab, Bitbucket), legge il codice a
 ### URL produzione
 | Componente | URL |
 |---|---|
-| Frontend | https://docpilot-app.netlify.app (da rinominare in readygen) |
+| Frontend | https://readygen-app.netlify.app |
 | Backend | https://docpilot-production-ff6b.up.railway.app |
 | Repository | https://github.com/paulnatan/docpilot |
 | Database | Supabase — https://cmpoemzdiiuebwdxludz.supabase.co |
@@ -90,7 +90,7 @@ Pagamenti   → Stripe (da implementare)
 | Funzionalità | Difficoltà | Tempo stimato | Note |
 |---|---|---|---|
 | **Mock Server** | ⭐⭐⭐ Medio | 4-6h | Server simulato per testare API senza backend |
-| **Rinominare Netlify** | ⭐ Triviale | 5min | Da docpilot-app a readygen-app |
+| **Rinominare Netlify** | ✅ Fatto | — | https://readygen-app.netlify.app |
 | **Migrazione Claude API** | ⭐⭐ Facile | 1h | Aumentare CHUNK_TOKEN_LIMIT da 8.000 a 50.000+ |
 | **n8n cloud** | ⭐⭐ Facile | 2h | Migrare n8n da locale a cloud per webhook stabili |
 | **GitLab credenziali** | ⭐ Triviale | 30min | Creare OAuth app su gitlab.com |
