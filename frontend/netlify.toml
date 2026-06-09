@@ -1,11 +1,7 @@
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = {Role = ["admin"]}
+[build]
+  publish = "."
 
-# Serve file .html senza redirect
 [[headers]]
   for = "/*.html"
   [headers.values]
-    Cache-Control = "no-cache"
+    Cache-Control = "no-cache, no-store, must-revalidate"
