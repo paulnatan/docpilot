@@ -936,6 +936,30 @@
   </div>
 </section>
 
+<!-- VIDEO DEMO -->
+<section id="demo" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <div class="reveal" style="text-align:center; margin-bottom:40px;">
+      <div class="section-label" id="demo-label">Demo</div>
+      <h2 class="section-title" id="demo-title">Vedi ReadyGen in azione.</h2>
+      <p class="section-sub" id="demo-sub" style="margin:0 auto;">Dalla connessione del repo alla documentazione generata — in meno di 60 secondi.</p>
+    </div>
+    <div class="reveal" style="max-width:860px; margin:0 auto;">
+      <div style="position:relative; border-radius:16px; overflow:hidden; box-shadow:0 8px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);">
+        <video
+          controls
+          preload="metadata"
+          style="width:100%; display:block; background:#0d1117;"
+          poster=""
+        >
+          <source src="images/demo_web.mp4" type="video/mp4" />
+          Il tuo browser non supporta il tag video.
+        </video>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- PRICING -->
 <section id="prezzi">
   <div class="container" style="text-align: center;">
@@ -1077,6 +1101,11 @@
       document.getElementById("db"+i).textContent = tl("db"+i);
       document.getElementById("da"+i).textContent = tl("da"+i);
     }
+
+    // Demo
+    document.getElementById("demo-label").textContent = tl("demo_label");
+    document.getElementById("demo-title").textContent = tl("demo_title");
+    document.getElementById("demo-sub").textContent   = tl("demo_sub");
 
     // Pricing
     document.getElementById("pricing-label").textContent = tl("pricing_label");
