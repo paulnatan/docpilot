@@ -59,12 +59,16 @@ async function init() {
     img.style.display = "block";
   }
 
-  // Mostra banner upgrade se piano Free
+  // Mostra banner in base al piano
   const plan = user.plan || "free";
   if (plan === "free") {
     const banner = document.getElementById("upgrade-banner");
     if (banner) banner.style.display = "flex";
+  } else if (plan === "pro") {
+    const banner = document.getElementById("pro-banner");
+    if (banner) banner.style.display = "flex";
   }
+  // Team: nessun banner (piano massimo)
 
   loadRepos();
 }

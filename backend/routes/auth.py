@@ -148,7 +148,7 @@ async def me(token: str):
         payload = jwt.decode(token, os.getenv("SECRET_KEY", "dev_secret"), algorithms=["HS256"])
         user_id = payload["sub"]
         from db.supabase import get_client
-        result = get_client().table("users").select("id,username,avatar_url,email,provider").eq("id", user_id).execute()
+        result = get_client().table("users").select("id,username,avatar_url,email,provider,plan").eq("id", user_id).execute()
         if not result.data:
             raise HTTPException(status_code=404, detail="Utente non trovato")
         return result.data[0]
