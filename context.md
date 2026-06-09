@@ -1,11 +1,12 @@
-# DocPilot — Contesto del progetto
+# DocForge — Contesto del progetto
 
 Micro SaaS per la **generazione automatica di documentazione tecnica** da repository Git.
 Sviluppatore: Paolo Natan — `p.natan23@gmail.com`
 Cartella progetto: `/Users/paulblack/Desktop/Development/DocPilot`
 Avviato: 04/06/2026
 
-> ⚠️ Il nome "DocPilot" è temporaneo — esiste già `docpilot.dev` (prodotto diverso ma stesso nome). Da scegliere un nuovo nome.
+> ✅ Nome definitivo: **DocForge** — dominio `docforge.io` disponibile (ECONNREFUSED = nessun sito attivo).
+> Da acquistare prima del lancio pubblico (~€12/anno su Namecheap o Cloudflare).
 
 ---
 
@@ -14,7 +15,7 @@ Avviato: 04/06/2026
 Problema reale vissuto internamente: nei team di sviluppo la documentazione tecnica è sempre disorganizzata o assente.
 Il tool si connette al repository (GitHub, GitLab, Bitbucket), legge il codice ad ogni commit e genera automaticamente tutta la documentazione tecnica con AI.
 
-> "I developer odiano scrivere documentazione. DocPilot la scrive al posto loro."
+> "I developer odiano scrivere documentazione. DocForge la scrive al posto loro."
 
 ---
 
@@ -31,7 +32,7 @@ Il tool si connette al repository (GitHub, GitLab, Bitbucket), legge il codice a
 ### URL produzione
 | Componente | URL |
 |---|---|
-| Frontend | https://docpilot-app.netlify.app |
+| Frontend | https://docpilot-app.netlify.app (da rinominare in docforge) |
 | Backend | https://docpilot-production-ff6b.up.railway.app |
 | Repository | https://github.com/paulnatan/docpilot |
 | Database | Supabase — https://cmpoemzdiiuebwdxludz.supabase.co |
@@ -70,6 +71,7 @@ Pagamenti   → Stripe (da implementare)
 | Multi-lingua documentazione AI | ✅ IT, EN, ES, FR, DE |
 | Landing page professionale | ✅ |
 | Provider abstraction layer | ✅ |
+| Rebranding DocPilot → DocForge | ✅ |
 
 ---
 
@@ -78,6 +80,7 @@ Pagamenti   → Stripe (da implementare)
 ### Priorità alta
 | Funzionalità | Difficoltà | Tempo stimato | Note |
 |---|---|---|---|
+| **Acquisto dominio docforge.io** | ⭐ Triviale | 15min | ~€12/anno su Namecheap o Cloudflare Registrar |
 | **SDK Generation** | ⭐⭐ Facile | 2-3h | AI genera codice client JS/Python/Swift per chiamare le API |
 | **Swagger/OpenAPI export** | ⭐⭐ Facile | 2-3h | Genera file openapi.json/swagger.yaml dal codice |
 | **Stripe pagamenti** | ⭐⭐⭐ Medio | 4-6h | Piano Pro €19/mese, Team €49/mese |
@@ -87,7 +90,7 @@ Pagamenti   → Stripe (da implementare)
 | Funzionalità | Difficoltà | Tempo stimato | Note |
 |---|---|---|---|
 | **Mock Server** | ⭐⭐⭐ Medio | 4-6h | Server simulato per testare API senza backend |
-| **Dominio custom** | ⭐ Triviale | 30min | docpilot.io o nome da scegliere (~€12/anno) |
+| **Rinominare Netlify** | ⭐ Triviale | 5min | Da docpilot-app a docforge-app |
 | **Migrazione Claude API** | ⭐⭐ Facile | 1h | Aumentare CHUNK_TOKEN_LIMIT da 8.000 a 50.000+ |
 | **n8n cloud** | ⭐⭐ Facile | 2h | Migrare n8n da locale a cloud per webhook stabili |
 | **GitLab credenziali** | ⭐ Triviale | 30min | Creare OAuth app su gitlab.com |
@@ -122,7 +125,7 @@ Break-even con soli **5 clienti Pro** (5 × €19 = €95 - €20 costi = €75 
 | Netlify (frontend) | €0 |
 | Supabase (database) | €0 → €25 con crescita |
 | Groq API (AI) | €0 free tier → migrazione Claude |
-| Dominio | ~€1/mese |
+| Dominio docforge.io | ~€1/mese |
 | Stripe | 2.9% + €0.30 per transazione |
 | **Totale MVP** | **€0-5/mese** |
 
@@ -143,13 +146,14 @@ Break-even con soli **5 clienti Pro** (5 × €19 = €95 - €20 costi = €75 
 ## 9. Marketing — piano lancio
 
 ```
-Step 1: Scegliere nuovo nome e dominio
-Step 2: Product Hunt launch (martedì/mercoledì 00:01 PST)
-Step 3: Reddit — r/webdev, r/programming, r/SideProject
-Step 4: Hacker News — Show HN
-Step 5: Twitter/X + LinkedIn thread #buildinpublic
-Step 6: Articolo tecnico su Dev.to / Hashnode
-Step 7: GitHub Marketplace + GitLab Marketplace
+Step 1: Acquistare docforge.io
+Step 2: Aggiornare URL Netlify e Railway con dominio custom
+Step 3: Product Hunt launch (martedì/mercoledì 00:01 PST)
+Step 4: Reddit — r/webdev, r/programming, r/SideProject
+Step 5: Hacker News — Show HN
+Step 6: Twitter/X + LinkedIn thread #buildinpublic
+Step 7: Articolo tecnico su Dev.to / Hashnode
+Step 8: GitHub Marketplace + GitLab Marketplace
 ```
 
 ---
@@ -161,14 +165,4 @@ Step 7: GitHub Marketplace + GitLab Marketplace
 - **GITHUB_REDIRECT_URI**: `https://docpilot-production-ff6b.up.railway.app/auth/callback/github`
 - **Railway PORT**: il server gira su porta 8080 (assegnata da Railway via $PORT)
 - **Supabase migration v2**: eseguita — aggiunge colonne `provider`, `gitlab_id`, `bitbucket_id`
-
----
-
-## 11. ⚠️ Da fare subito — NOME
-
-Il nome "DocPilot" è già usato da `docpilot.dev` (prodotto diverso).
-Bisogna scegliere un nome nuovo prima del lancio pubblico e del dominio.
-
-Candidati da valutare:
-- da definire in sessione brainstorming
-
+- **localStorage keys**: `docpilot_token` e `docpilot_lang` (mantenute per retrocompatibilità)
