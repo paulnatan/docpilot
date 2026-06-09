@@ -41,6 +41,16 @@ async def generate(request: GenerateRequest, authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
     user = _get_user_from_token(token)
     provider = get_git_provider(user.get("provider", "github"), user["access_token"])
+    try:
+        return await _generate_inner(request, user, provider)
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[GENERATE ERROR] {request.doc_type} — {request.repo_full_name}: {e}")
+        raise HTTPException(status_code=500, detail=f"Errore nella generazione: {str(e)}")
+
+
+async def _generate_inner(request: GenerateRequest, user: dict, provider):
 
     file_tree_str = ""
     file_contents_str = ""

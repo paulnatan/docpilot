@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 from dotenv import load_dotenv
 import os
 
@@ -23,6 +24,23 @@ origins = [
     "http://127.0.0.1:3000",
 ]
 
+class CORSErrorMiddleware(BaseHTTPMiddleware):
+    """Garantisce CORS headers anche sulle risposte di errore 500."""
+    async def dispatch(self, request: Request, call_next):
+        try:
+            response = await call_next(request)
+            return response
+        except Exception as exc:
+            origin = request.headers.get("origin", "*")
+            allowed = origin if origin in origins else (origins[0] if origins else "*")
+            return JSONResponse(
+                status_code=500,
+                content={"detail": f"Errore interno: {str(exc)}"},
+                headers={"Access-Control-Allow-Origin": allowed,
+                         "Access-Control-Allow-Credentials": "false"},
+            )
+
+app.add_middleware(CORSErrorMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
