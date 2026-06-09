@@ -3,6 +3,7 @@ from pydantic import BaseModel as _BaseModel
 from models.schemas import GenerateRequest
 from services.provider_factory import get_git_provider
 from services.ai import generate_doc
+from services.email import send_doc_ready_email
 from db.supabase import save_doc, get_docs_by_user, get_client
 from jose import jwt
 import os
@@ -45,7 +46,7 @@ async def generate(request: GenerateRequest, authorization: str = Header(...)):
     file_contents_str = ""
     commits_str = ""
 
-    if request.doc_type in ("readme", "api_docs", "overview"):
+    if request.doc_type in ("readme", "api_docs", "overview", "openapi", "sdk"):
         branch = request.branch or await provider.get_default_branch(request.repo_full_name)
         tree = await provider.get_repo_tree(request.repo_full_name, branch)
 
@@ -106,6 +107,19 @@ async def generate(request: GenerateRequest, authorization: str = Header(...)):
         "provider": user.get("provider", "github"),
     })
 
+    # Notifica email (non bloccante — ignora errori)
+    try:
+        user_email = user.get("email", "")
+        if user_email and request.doc_type != "comments":
+            send_doc_ready_email(
+                to_email=user_email,
+                username=user.get("username", ""),
+                repo_name=request.repo_full_name,
+                doc_type=request.doc_type,
+            )
+    except Exception:
+        pass
+
     return {"id": saved.get("id"), "content": doc_content}
 
 
@@ -129,6 +143,8 @@ async def push_to_github(request: PushDocRequest, authorization: str = Header(..
         "changelog": "CHANGELOG.md",
         "api_docs": "docs/API.md",
         "overview": "docs/PROJECT_OVERVIEW.md",
+        "openapi": "docs/openapi.yaml",
+        "sdk": "docs/SDK.md",
         "comments": None,
     }
 

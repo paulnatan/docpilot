@@ -80,6 +80,8 @@ function renderRepos(repos) {
         <button class="btn btn-secondary" onclick="generate('${repo.full_name}', 'changelog')">${t('btn_changelog')}</button>
         <button class="btn btn-secondary" onclick="selectFileForComments('${repo.full_name}')">${t('btn_comments')}</button>
         <button class="btn btn-secondary" style="border-color: #bc8cff; color: #bc8cff;" onclick="generate('${repo.full_name}', 'overview')">${t('btn_overview')}</button>
+        <button class="btn btn-secondary" style="border-color: #f0883e; color: #f0883e;" onclick="generate('${repo.full_name}', 'openapi')">${t('btn_openapi')}</button>
+        <button class="btn btn-secondary" style="border-color: #58a6ff; color: #58a6ff;" onclick="generate('${repo.full_name}', 'sdk')">${t('btn_sdk')}</button>
       </div>
     </div>
   `).join("");
@@ -112,6 +114,8 @@ async function generate(repoFullName, docType) {
     changelog: t("label_changelog"),
     overview: t("label_overview"),
     comments: t("label_comments"),
+    openapi: t("label_openapi"),
+    sdk: t("label_sdk"),
   };
 
   const branchInput = document.getElementById(`branch-${repoFullName.replace("/", "-")}`);
@@ -154,7 +158,7 @@ async function generate(repoFullName, docType) {
 
     // Mostra bottone push solo per tipi pushabili
     const pushBtn = document.getElementById("push-btn");
-    pushBtn.style.display = ["readme", "changelog", "api_docs", "overview"].includes(docType) ? "inline-flex" : "none";
+    pushBtn.style.display = ["readme", "changelog", "api_docs", "overview", "openapi", "sdk"].includes(docType) ? "inline-flex" : "none";
 
     showToast("Documentazione generata con successo!");
 

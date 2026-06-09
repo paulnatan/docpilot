@@ -23,6 +23,8 @@ const TRANSLATIONS = {
     btn_changelog: "Changelog",
     btn_comments: "💬 Commenti",
     btn_overview: "🏗️ Overview",
+    btn_openapi: "📐 OpenAPI",
+    btn_sdk: "🔧 SDK",
     btn_copy: "📋 Copia",
     btn_download: "⬇️ Scarica",
     btn_push: "🚀 Push nel repo",
@@ -66,6 +68,8 @@ const TRANSLATIONS = {
     label_changelog: "Changelog",
     label_comments: "Commenti",
     label_overview: "🏗️ Project Overview",
+    label_openapi: "📐 OpenAPI / Swagger",
+    label_sdk: "🔧 SDK Client",
   },
 
   en: {
@@ -87,6 +91,8 @@ const TRANSLATIONS = {
     btn_changelog: "Changelog",
     btn_comments: "💬 Comments",
     btn_overview: "🏗️ Overview",
+    btn_openapi: "📐 OpenAPI",
+    btn_sdk: "🔧 SDK",
     btn_copy: "📋 Copy",
     btn_download: "⬇️ Download",
     btn_push: "🚀 Push to repo",
@@ -120,6 +126,8 @@ const TRANSLATIONS = {
     label_changelog: "Changelog",
     label_comments: "Comments",
     label_overview: "🏗️ Project Overview",
+    label_openapi: "📐 OpenAPI / Swagger",
+    label_sdk: "🔧 SDK Client",
   },
 
   fr: {
@@ -141,6 +149,8 @@ const TRANSLATIONS = {
     btn_changelog: "Changelog",
     btn_comments: "💬 Commentaires",
     btn_overview: "🏗️ Vue d'ensemble",
+    btn_openapi: "📐 OpenAPI",
+    btn_sdk: "🔧 SDK",
     btn_copy: "📋 Copier",
     btn_download: "⬇️ Télécharger",
     btn_push: "🚀 Push dans le dépôt",
@@ -174,6 +184,8 @@ const TRANSLATIONS = {
     label_changelog: "Changelog",
     label_comments: "Commentaires",
     label_overview: "🏗️ Vue d'ensemble",
+    label_openapi: "📐 OpenAPI / Swagger",
+    label_sdk: "🔧 SDK Client",
   },
 
   de: {
@@ -195,6 +207,8 @@ const TRANSLATIONS = {
     btn_changelog: "Changelog",
     btn_comments: "💬 Kommentare",
     btn_overview: "🏗️ Übersicht",
+    btn_openapi: "📐 OpenAPI",
+    btn_sdk: "🔧 SDK",
     btn_copy: "📋 Kopieren",
     btn_download: "⬇️ Herunterladen",
     btn_push: "🚀 Push ins Repo",
@@ -228,6 +242,8 @@ const TRANSLATIONS = {
     label_changelog: "Changelog",
     label_comments: "Kommentare",
     label_overview: "🏗️ Projektübersicht",
+    label_openapi: "📐 OpenAPI / Swagger",
+    label_sdk: "🔧 SDK Client",
   },
 
   es: {
@@ -249,6 +265,8 @@ const TRANSLATIONS = {
     btn_changelog: "Changelog",
     btn_comments: "💬 Comentarios",
     btn_overview: "🏗️ Resumen",
+    btn_openapi: "📐 OpenAPI",
+    btn_sdk: "🔧 SDK",
     btn_copy: "📋 Copiar",
     btn_download: "⬇️ Descargar",
     btn_push: "🚀 Push al repo",
@@ -282,6 +300,8 @@ const TRANSLATIONS = {
     label_changelog: "Changelog",
     label_comments: "Comentarios",
     label_overview: "🏗️ Resumen del proyecto",
+    label_openapi: "📐 OpenAPI / Swagger",
+    label_sdk: "🔧 SDK Client",
   },
 };
 

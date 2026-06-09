@@ -217,6 +217,55 @@ Analisi parziali da unire:
 Crea un documento definitivo professionale. Ogni sezione deve avere almeno 4-6 punti dettagliati.
 """,
 
+    "openapi": """Sei un esperto di API design. Analizza il codice seguente e genera una specifica OpenAPI 3.0 completa in formato YAML.
+
+La specifica deve includere:
+- info (title, version, description)
+- servers
+- paths con tutti gli endpoint trovati nel codice
+- Per ogni endpoint: summary, description, parameters, requestBody, responses con schema
+- components/schemas per i modelli di dati trovati
+- security schemes se presenti
+
+Restituisci SOLO il YAML valido, senza spiegazioni o markdown code block.
+
+Repository: {repo_name}
+Codice:
+{file_contents}
+""",
+
+    "sdk": """Sei un esperto sviluppatore. Analizza il codice seguente e genera un SDK client completo in JavaScript/TypeScript e Python per consumare le API trovate.
+
+Per ogni linguaggio genera:
+1. Una classe client con tutti i metodi corrispondenti agli endpoint API trovati
+2. Tipi/interfacce TypeScript per i modelli di dati
+3. Gestione degli errori
+4. Esempi d'uso per ogni metodo
+
+Formato output:
+## JavaScript/TypeScript SDK
+```typescript
+// codice qui
+```
+
+## Python SDK
+```python
+# codice qui
+```
+
+## Esempi d'uso
+```typescript
+// esempi JS
+```
+```python
+# esempi Python
+```
+
+Repository: {repo_name}
+Codice API:
+{file_contents}
+""",
+
     "comments": """Sei un esperto sviluppatore software. Il tuo compito è aggiungere commenti inline chiari e utili al codice seguente.
 
 Regole:

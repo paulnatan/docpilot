@@ -7,6 +7,7 @@ load_dotenv()
 
 from routes.auth import router as auth_router
 from routes.docs import router as docs_router
+from routes.payments import router as payments_router
 
 app = FastAPI(title="ReadyGen API", version="1.0.0")
 
@@ -31,6 +32,7 @@ app.add_middleware(
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(docs_router, prefix="/docs", tags=["docs"])
+app.include_router(payments_router, prefix="/payments", tags=["payments"])
 
 
 @app.get("/")
