@@ -52,6 +52,53 @@ FRIENDLY_ERRORS = {
 }
 
 
+# Limiti del piano Free, in linea con quanto promesso in homepage:
+# "1 repository, README automatico, Changelog base, Storico 7 giorni"
+PLAN_LIMITS = {
+    "free": {
+        "doc_types": {"readme", "changelog"},
+        "max_repos": 1,
+    },
+    # pro / team: nessuna limitazione
+}
+
+PLAN_ERRORS = {
+    "doc_type": {
+        "it": "Questo tipo di documentazione è disponibile solo con i piani Pro o Team. Aggiorna il tuo piano per sbloccarlo.",
+        "en": "This documentation type is only available on the Pro or Team plans. Upgrade your plan to unlock it.",
+        "fr": "Ce type de documentation est disponible uniquement avec les plans Pro ou Team. Passez à un plan supérieur pour le débloquer.",
+        "de": "Dieser Dokumentationstyp ist nur in den Plänen Pro oder Team verfügbar. Upgrade deinen Plan, um ihn freizuschalten.",
+        "es": "Este tipo de documentación solo está disponible en los planes Pro o Team. Actualiza tu plan para desbloquearlo.",
+    },
+    "repo_limit": {
+        "it": "Il piano Free supporta 1 solo repository. Aggiorna a Pro o Team per generare documentazione su più repository.",
+        "en": "The Free plan supports only 1 repository. Upgrade to Pro or Team to generate docs for more repositories.",
+        "fr": "Le plan Free ne prend en charge qu'un seul dépôt. Passez à Pro ou Team pour générer de la documentation sur plusieurs dépôts.",
+        "de": "Der Free-Plan unterstützt nur 1 Repository. Upgrade auf Pro oder Team, um Dokumentation für weitere Repositories zu erstellen.",
+        "es": "El plan Free admite solo 1 repositorio. Actualiza a Pro o Team para generar documentación en más repositorios.",
+    },
+}
+
+
+def _check_plan_limits(user: dict, request: GenerateRequest) -> None:
+    """Verifica che l'utente non superi i limiti del proprio piano.
+    Solleva HTTPException(403) con un messaggio tradotto se li supera."""
+    plan = user.get("plan", "free")
+    limits = PLAN_LIMITS.get(plan)
+    if not limits:
+        return  # pro / team: nessun limite
+
+    lang = request.lang if request.lang in ("it", "en", "fr", "de", "es") else "it"
+
+    if request.doc_type not in limits["doc_types"]:
+        raise HTTPException(status_code=403, detail=PLAN_ERRORS["doc_type"][lang])
+
+    docs = get_docs_by_user(user["id"])
+    repos_used = {d["repo_name"] for d in docs}
+    if request.repo_full_name not in repos_used and len(repos_used) >= limits["max_repos"]:
+        raise HTTPException(status_code=403, detail=PLAN_ERRORS["repo_limit"][lang])
+
+
 def _friendly_error_message(e: Exception, lang: str = "it") -> str:
     """Converte un'eccezione tecnica in un messaggio comprensibile per l'utente."""
     lang = lang if lang in ("it", "en", "fr", "de", "es") else "it"
@@ -168,6 +215,7 @@ async def generate(request: GenerateRequest, authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
     user = _get_user_from_token(token)
     provider = get_git_provider(user.get("provider", "github"), user["access_token"])
+    _check_plan_limits(user, request)
     try:
         return await _generate_inner(request, user, provider)
     except HTTPException:
@@ -299,6 +347,16 @@ async def history(authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
     user = _get_user_from_token(token)
     docs = get_docs_by_user(user["id"])
+
+    # Piano Free: storico limitato agli ultimi 7 giorni
+    if user.get("plan", "free") == "free":
+        from datetime import datetime, timedelta, timezone
+        cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+        docs = [
+            d for d in docs
+            if d.get("generated_at") and datetime.fromisoformat(d["generated_at"].replace("Z", "+00:00")) >= cutoff
+        ]
+
     return docs
 
 
