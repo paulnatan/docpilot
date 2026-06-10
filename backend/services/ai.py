@@ -1,8 +1,6 @@
 from openai import OpenAI
 import os
 
-_client: OpenAI | None = None
-
 # Gemini 2.0 Flash: contesto fino a ~1M token, limiti per-minuto molto più ampi
 # rispetto a Groq free tier. Manteniamo comunque il chunking come rete di
 # sicurezza per repository molto grandi, ma con soglie molto più alte.
@@ -399,48 +397,75 @@ Codice da commentare:
 }
 
 
-AI_MODEL = "gemini-2.5-flash"
+# Catena di fallback: se il primo modello/provider è sovraccarico (503) o ha
+# esaurito la quota (429), si passa al successivo. Gemini Flash → Gemini Flash
+# Lite (più leggero, meno soggetto a sovraccarico) → Groq come ultima spiaggia.
+FALLBACK_CHAIN = [
+    {"provider": "gemini", "model": "gemini-2.5-flash"},
+    {"provider": "gemini", "model": "gemini-2.5-flash-lite"},
+    {"provider": "groq", "model": "llama-3.3-70b-versatile"},
+]
+
+PROVIDER_CONFIG = {
+    "gemini": {
+        "api_key_env": "GEMINI_API_KEY",
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    },
+    "groq": {
+        "api_key_env": "GROQ_API_KEY",
+        "base_url": "https://api.groq.com/openai/v1",
+    },
+}
+
+_clients: dict[str, OpenAI] = {}
 
 
-def get_client() -> OpenAI:
-    global _client
-    if _client is None:
-        api_key = os.getenv("GEMINI_API_KEY")
+def _get_client_for(provider: str) -> OpenAI | None:
+    if provider not in _clients:
+        config = PROVIDER_CONFIG[provider]
+        api_key = os.getenv(config["api_key_env"])
         if not api_key:
-            raise RuntimeError("GEMINI_API_KEY mancante nel .env")
-        _client = OpenAI(
-            api_key=api_key,
-            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-        )
-    return _client
+            return None
+        _clients[provider] = OpenAI(api_key=api_key, base_url=config["base_url"])
+    return _clients[provider]
 
 
 def _call_model(prompt: str, max_tokens: int = 8000) -> str:
     import time
     from openai import APIStatusError
 
-    client = get_client()
-    last_error = None
+    last_error: Exception | None = None
 
-    # Retry con backoff per errori temporanei (503 "model overloaded", 429 rate limit)
-    for attempt in range(4):
-        try:
-            response = client.chat.completions.create(
-                model=AI_MODEL,
-                max_tokens=max_tokens,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            return response.choices[0].message.content
-        except APIStatusError as e:
-            last_error = e
-            if e.status_code in (429, 503) and attempt < 3:
-                wait = 2 ** (attempt + 1)  # 2s, 4s, 8s
-                print(f"[AI] {e.status_code} ricevuto, retry tra {wait}s (tentativo {attempt + 1}/4)")
-                time.sleep(wait)
-                continue
-            raise
+    for entry in FALLBACK_CHAIN:
+        client = _get_client_for(entry["provider"])
+        if client is None:
+            continue
 
-    raise last_error
+        # Un solo retry rapido per modello prima di passare al successivo della catena
+        for attempt in range(2):
+            try:
+                response = client.chat.completions.create(
+                    model=entry["model"],
+                    max_tokens=max_tokens,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                return response.choices[0].message.content
+            except APIStatusError as e:
+                last_error = e
+                if e.status_code in (429, 503) and attempt == 0:
+                    print(f"[AI] {entry['provider']}/{entry['model']} -> {e.status_code}, retry tra 2s")
+                    time.sleep(2)
+                    continue
+                print(f"[AI] {entry['provider']}/{entry['model']} -> {e.status_code}, passo al provider successivo")
+                break
+            except Exception as e:
+                last_error = e
+                print(f"[AI] {entry['provider']}/{entry['model']} -> errore inatteso: {e}, passo al provider successivo")
+                break
+
+    if last_error:
+        raise last_error
+    raise RuntimeError("Nessun provider AI configurato (GEMINI_API_KEY / GROQ_API_KEY mancanti)")
 
 
 def _split_into_chunks(text: str) -> list[str]:
