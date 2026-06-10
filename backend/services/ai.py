@@ -416,13 +416,31 @@ def get_client() -> OpenAI:
 
 
 def _call_model(prompt: str, max_tokens: int = 8000) -> str:
+    import time
+    from openai import APIStatusError
+
     client = get_client()
-    response = client.chat.completions.create(
-        model=AI_MODEL,
-        max_tokens=max_tokens,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return response.choices[0].message.content
+    last_error = None
+
+    # Retry con backoff per errori temporanei (503 "model overloaded", 429 rate limit)
+    for attempt in range(4):
+        try:
+            response = client.chat.completions.create(
+                model=AI_MODEL,
+                max_tokens=max_tokens,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return response.choices[0].message.content
+        except APIStatusError as e:
+            last_error = e
+            if e.status_code in (429, 503) and attempt < 3:
+                wait = 2 ** (attempt + 1)  # 2s, 4s, 8s
+                print(f"[AI] {e.status_code} ricevuto, retry tra {wait}s (tentativo {attempt + 1}/4)")
+                time.sleep(wait)
+                continue
+            raise
+
+    raise last_error
 
 
 def _split_into_chunks(text: str) -> list[str]:
