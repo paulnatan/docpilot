@@ -893,6 +893,12 @@
         <p id="f6-desc">Python, JavaScript, TypeScript, Dart, Swift, Kotlin, Go, Java, PHP e molto altro. Se è codice, lo documentiamo.</p>
       </div>
     </div>
+
+    <div class="reveal" style="margin-top:40px; text-align:center; max-width:760px; margin-left:auto; margin-right:auto;">
+      <p id="feat-langs-title" style="font-weight:700; margin-bottom:12px; color: var(--text);">Linguaggi supportati</p>
+      <p id="feat-langs-list" style="color: var(--text-muted); font-size:14px; line-height:1.8;">Python, JavaScript, TypeScript, Go, Java, Ruby, PHP, C#, C/C++, Rust, Dart, Swift, Kotlin, Scala, Elixir, Lua, R, Perl, Objective-C, Vue, HTML, CSS/SCSS/SASS/LESS, SQL, Shell, YAML, JSON, TOML e altri.</p>
+      <p id="feat-beta-note" style="margin-top:16px; font-size:13px; color: var(--text-muted); background: rgba(63,185,80,0.08); border:1px solid rgba(63,185,80,0.2); border-radius:10px; padding:12px 16px; display:inline-block;">ℹ️ In fase beta, ReadyGen analizza fino a 60 file per repository, selezionati automaticamente per rilevanza.</p>
+    </div>
   </div>
 </section>
 
@@ -1022,6 +1028,10 @@
       </div>
 
     </div>
+
+    <div class="reveal" style="margin-top:32px; max-width:640px; margin-left:auto; margin-right:auto;">
+      <p id="pricing-beta-note" style="font-size:13px; color: var(--text-muted); background: rgba(88,166,255,0.08); border:1px solid rgba(88,166,255,0.2); border-radius:10px; padding:12px 16px;">ℹ️ In questa fase beta, ReadyGen analizza fino a 60 file per repository (selezionati per rilevanza). Repo più grandi sono supportati in modo prioritario man mano che la piattaforma cresce.</p>
+    </div>
   </div>
 </section>
 
@@ -1086,6 +1096,9 @@
       document.getElementById("f"+i+"-title").textContent = tl("f"+i+"_title");
       document.getElementById("f"+i+"-desc").textContent  = tl("f"+i+"_desc");
     }
+    document.getElementById("feat-langs-title").textContent = tl("feat_langs_title");
+    document.getElementById("feat-langs-list").textContent  = tl("feat_langs_list");
+    document.getElementById("feat-beta-note").textContent   = tl("beta_note");
 
     // Confronto
     document.getElementById("why-label").textContent       = tl("why_label");
@@ -1107,6 +1120,7 @@
     document.getElementById("pricing-label").textContent = tl("pricing_label");
     document.getElementById("pricing-title").innerHTML   = tl("pricing_title");
     document.getElementById("pricing-sub").textContent   = tl("pricing_sub");
+    document.getElementById("pricing-beta-note").textContent = tl("beta_note_pricing");
 
     // Footer CTA
     document.getElementById("footer-cta-title").innerHTML = tl("footer_cta_title");
