@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel as _BaseModel
 from models.schemas import GenerateRequest
@@ -122,6 +123,25 @@ def _select_relevant_files(tree: list, limit: int) -> list:
     return candidates[:limit]
 
 
+async def _fetch_files_content(provider, repo_full_name: str, code_files: list, max_chars: int = MAX_CHARS_PER_FILE) -> str:
+    """Scarica il contenuto di più file in parallelo (limite di concorrenza) per
+    velocizzare la generazione su repository con molti file."""
+    semaphore = asyncio.Semaphore(10)
+
+    async def fetch_one(path: str):
+        async with semaphore:
+            content = await provider.get_file_content(repo_full_name, path)
+            return path, content
+
+    results = await asyncio.gather(*(fetch_one(p) for p in code_files))
+
+    contents = []
+    for path, content in results:
+        if content:
+            contents.append(f"### {path}\n```\n{content[:max_chars]}\n```")
+    return "\n\n".join(contents)
+
+
 def _get_user_from_token(token: str) -> dict:
     try:
         payload = jwt.decode(token, os.getenv("SECRET_KEY", "dev_secret"), algorithms=["HS256"])
@@ -171,12 +191,7 @@ async def _generate_inner(request: GenerateRequest, user: dict, provider):
 
         file_tree_str = "\n".join(item["path"] for item in tree if item["type"] == "blob")
 
-        contents = []
-        for path in code_files:
-            content = await provider.get_file_content(request.repo_full_name, path)
-            if content:
-                contents.append(f"### {path}\n```\n{content[:MAX_CHARS_PER_FILE]}\n```")
-        file_contents_str = "\n\n".join(contents)
+        file_contents_str = await _fetch_files_content(provider, request.repo_full_name, code_files)
 
     elif request.doc_type == "changelog":
         commits = await provider.get_recent_commits(request.repo_full_name)
@@ -327,12 +342,7 @@ async def _auto_generate(user: dict, repo_name: str):
         code_files = _select_relevant_files(tree, MAX_FILES)
 
         file_tree_str = "\n".join(item["path"] for item in tree if item["type"] == "blob")
-        contents = []
-        for path in code_files:
-            content = await provider.get_file_content(repo_name, path)
-            if content:
-                contents.append(f"### {path}\n```\n{content[:MAX_CHARS_PER_FILE]}\n```")
-        file_contents_str = "\n\n".join(contents)
+        file_contents_str = await _fetch_files_content(provider, repo_name, code_files)
 
         readme_content = generate_doc(
             doc_type="readme",

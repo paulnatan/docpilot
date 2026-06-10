@@ -441,6 +441,13 @@ def _call_model(prompt: str, max_tokens: int = 8000) -> str:
         if client is None:
             continue
 
+        # Per i modelli Gemini disabilitiamo il "thinking" interno: per la
+        # generazione di documentazione non serve ragionamento esteso e ci
+        # costa decine di secondi di latenza in più ad ogni chiamata.
+        extra_kwargs = {}
+        if entry["provider"] == "gemini":
+            extra_kwargs["extra_body"] = {"reasoning_effort": "none"}
+
         # Un solo retry rapido per modello prima di passare al successivo della catena
         for attempt in range(2):
             try:
@@ -448,6 +455,7 @@ def _call_model(prompt: str, max_tokens: int = 8000) -> str:
                     model=entry["model"],
                     max_tokens=max_tokens,
                     messages=[{"role": "user", "content": prompt}],
+                    **extra_kwargs,
                 )
                 return response.choices[0].message.content
             except APIStatusError as e:
