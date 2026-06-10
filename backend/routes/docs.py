@@ -10,9 +10,57 @@ import os
 
 router = APIRouter()
 
-SUPPORTED_EXTENSIONS = {".py", ".js", ".ts", ".go", ".java", ".rb", ".php", ".cs", ".cpp", ".rs", ".dart", ".swift", ".kt", ".vue", ".jsx", ".tsx"}
-MAX_FILES = 30
+SUPPORTED_EXTENSIONS = {
+    # Backend / general purpose
+    ".py", ".js", ".ts", ".go", ".java", ".rb", ".php", ".cs", ".cpp", ".c", ".h", ".hpp",
+    ".rs", ".dart", ".swift", ".kt", ".scala", ".ex", ".exs", ".lua", ".r", ".pl", ".m", ".mm",
+    # Frontend
+    ".vue", ".jsx", ".tsx", ".html", ".css", ".scss", ".sass", ".less",
+    # Config / infra / db
+    ".sql", ".sh", ".yaml", ".yml", ".json", ".toml",
+}
+
+# File da escludere anche se hanno estensione supportata (lock file, build, dipendenze)
+EXCLUDE_PATTERNS = (
+    "node_modules/", "dist/", "build/", "vendor/", ".min.", "__pycache__/",
+    "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "composer.lock",
+    "Pipfile.lock", "Gemfile.lock", ".next/", "target/", ".venv/", "venv/",
+)
+
+# File "importanti" — se trovati, hanno priorità nell'analisi
+PRIORITY_NAMES = (
+    "main", "index", "app", "server", "api", "router", "routes",
+    "config", "settings", "schema", "models",
+)
+
+MAX_FILES = 60
 MAX_CHARS_PER_FILE = 3000
+
+
+def _select_relevant_files(tree: list, limit: int) -> list:
+    """Seleziona i file di codice più rilevanti da analizzare, fino a `limit`.
+
+    Priorità:
+    1. Esclude file in cartelle di build/dipendenze e lock file
+    2. File con nomi "importanti" (main, index, app, ecc.) per primi
+    3. File nella root o a basso livello di annidamento
+    4. Ordine alfabetico come fallback
+    """
+    candidates = [
+        item["path"] for item in tree
+        if item["type"] == "blob"
+        and any(item["path"].endswith(ext) for ext in SUPPORTED_EXTENSIONS)
+        and not any(pattern in item["path"] for pattern in EXCLUDE_PATTERNS)
+    ]
+
+    def score(path: str):
+        depth = path.count("/")
+        filename = path.rsplit("/", 1)[-1].lower()
+        is_priority = any(name in filename for name in PRIORITY_NAMES)
+        return (0 if is_priority else 1, depth, path.lower())
+
+    candidates.sort(key=score)
+    return candidates[:limit]
 
 
 def _get_user_from_token(token: str) -> dict:
@@ -60,13 +108,7 @@ async def _generate_inner(request: GenerateRequest, user: dict, provider):
         branch = request.branch or await provider.get_default_branch(request.repo_full_name)
         tree = await provider.get_repo_tree(request.repo_full_name, branch)
 
-        file_limit = 60 if request.doc_type == "overview" else MAX_FILES
-
-        code_files = [
-            item["path"] for item in tree
-            if item["type"] == "blob"
-            and any(item["path"].endswith(ext) for ext in SUPPORTED_EXTENSIONS)
-        ][:file_limit]
+        code_files = _select_relevant_files(tree, MAX_FILES)
 
         file_tree_str = "\n".join(item["path"] for item in tree if item["type"] == "blob")
 
@@ -92,6 +134,7 @@ async def _generate_inner(request: GenerateRequest, user: dict, provider):
                 item["path"] for item in tree
                 if item["type"] == "blob"
                 and any(item["path"].endswith(ext) for ext in SUPPORTED_EXTENSIONS)
+                and not any(pattern in item["path"] for pattern in EXCLUDE_PATTERNS)
             ]
             return {"files": code_files, "select_file": True}
         else:
@@ -222,11 +265,7 @@ async def _auto_generate(user: dict, repo_name: str):
 
         # 1. Genera README
         tree = await provider.get_repo_tree(repo_name, branch)
-        code_files = [
-            item["path"] for item in tree
-            if item["type"] == "blob"
-            and any(item["path"].endswith(ext) for ext in SUPPORTED_EXTENSIONS)
-        ][:MAX_FILES]
+        code_files = _select_relevant_files(tree, MAX_FILES)
 
         file_tree_str = "\n".join(item["path"] for item in tree if item["type"] == "blob")
         contents = []
