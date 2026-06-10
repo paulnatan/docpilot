@@ -80,6 +80,38 @@ Codice:
 {file_contents}
 """,
 
+    "api_docs_chunk": """Sei un esperto di documentazione API. Stai analizzando la PARTE {chunk_num} di {total_chunks} di un repository.
+
+Estrai da questo chunk TUTTI gli endpoint API trovati:
+- Metodo HTTP e path
+- Descrizione
+- Parametri (query, body, path)
+- Risposta (schema + esempio)
+- Codici di errore
+
+Sii preciso e tecnico. Questo sarà usato per costruire una documentazione API completa.
+
+Repository: {repo_name}
+Chunk {chunk_num}/{total_chunks}:
+{file_contents}
+""",
+
+    "api_docs_merge": """Sei un esperto di documentazione API. Hai analizzato il repository {repo_name} in {total_chunks} parti.
+
+Combina tutte le analisi parziali in un'unica documentazione API completa in Markdown.
+
+Per ogni endpoint trovato nelle analisi parziali documenta:
+- Metodo HTTP e path
+- Descrizione
+- Parametri (query, body, path)
+- Risposta (schema + esempio)
+- Codici di errore
+
+Repository: {repo_name}
+Analisi parziali:
+{partial_docs}
+""",
+
     "changelog": """Sei un esperto di release management. Analizza i seguenti commit Git e genera un CHANGELOG.md professionale.
 
 Raggruppa i cambiamenti per tipo:
@@ -418,7 +450,7 @@ def generate_doc(doc_type: str, repo_name: str, file_tree: str = "", file_conten
     lang_instruction = LANG_INSTRUCTIONS.get(lang, LANG_INSTRUCTIONS["it"])
 
     # Per doc type che supportano chunking → chunking automatico se il contenuto è grande
-    if doc_type in ("readme", "overview", "openapi", "sdk") and len(file_contents) > CHUNK_SIZE_CHARS:
+    if doc_type in ("readme", "overview", "openapi", "sdk", "api_docs") and len(file_contents) > CHUNK_SIZE_CHARS:
         return _generate_with_chunks(repo_name, file_tree, file_contents, doc_type, lang_instruction)
 
     prompt_template = PROMPTS.get(doc_type)
