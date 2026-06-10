@@ -10,6 +10,65 @@ import os
 
 router = APIRouter()
 
+# Messaggi di errore "umani" mostrati all'utente al posto del raw error dell'AI provider,
+# tradotti nelle lingue supportate dall'app.
+FRIENDLY_ERRORS = {
+    "overloaded": {
+        "it": "Il servizio AI è momentaneamente sovraccarico. Riprova tra qualche minuto.",
+        "en": "The AI service is temporarily overloaded. Please try again in a few minutes.",
+        "fr": "Le service IA est temporairement surchargé. Réessayez dans quelques minutes.",
+        "de": "Der KI-Dienst ist vorübergehend überlastet. Bitte versuche es in ein paar Minuten erneut.",
+        "es": "El servicio de IA está momentáneamente sobrecargado. Inténtalo de nuevo en unos minutos.",
+    },
+    "rate_limit": {
+        "it": "Abbiamo raggiunto il limite di richieste momentaneo. Riprova tra qualche minuto.",
+        "en": "We've hit a temporary request limit. Please try again in a few minutes.",
+        "fr": "Nous avons atteint une limite de requêtes temporaire. Réessayez dans quelques minutes.",
+        "de": "Wir haben vorübergehend ein Anfragelimit erreicht. Bitte versuche es in ein paar Minuten erneut.",
+        "es": "Hemos alcanzado un límite temporal de solicitudes. Inténtalo de nuevo en unos minutos.",
+    },
+    "auth": {
+        "it": "Errore di configurazione del servizio AI. Il nostro team è stato avvisato.",
+        "en": "AI service configuration error. Our team has been notified.",
+        "fr": "Erreur de configuration du service IA. Notre équipe a été informée.",
+        "de": "Konfigurationsfehler des KI-Dienstes. Unser Team wurde benachrichtigt.",
+        "es": "Error de configuración del servicio de IA. Nuestro equipo ha sido notificado.",
+    },
+    "timeout": {
+        "it": "La generazione ha impiegato troppo tempo. Riprova, magari su un repository più piccolo.",
+        "en": "The generation took too long. Please try again, maybe with a smaller repository.",
+        "fr": "La génération a pris trop de temps. Réessayez, éventuellement avec un dépôt plus petit.",
+        "de": "Die Generierung hat zu lange gedauert. Versuche es erneut, eventuell mit einem kleineren Repository.",
+        "es": "La generación tardó demasiado. Inténtalo de nuevo, quizás con un repositorio más pequeño.",
+    },
+    "generic": {
+        "it": "Si è verificato un errore imprevisto durante la generazione. Riprova più tardi.",
+        "en": "An unexpected error occurred during generation. Please try again later.",
+        "fr": "Une erreur inattendue s'est produite lors de la génération. Réessayez plus tard.",
+        "de": "Während der Generierung ist ein unerwarteter Fehler aufgetreten. Bitte versuche es später erneut.",
+        "es": "Se produjo un error inesperado durante la generación. Inténtalo de nuevo más tarde.",
+    },
+}
+
+
+def _friendly_error_message(e: Exception, lang: str = "it") -> str:
+    """Converte un'eccezione tecnica in un messaggio comprensibile per l'utente."""
+    lang = lang if lang in ("it", "en", "fr", "de", "es") else "it"
+    text = str(e).lower()
+
+    if "503" in text or "overloaded" in text or "unavailable" in text:
+        key = "overloaded"
+    elif "429" in text or "rate limit" in text or "resource_exhausted" in text or "quota" in text:
+        key = "rate_limit"
+    elif "401" in text or "403" in text or "api_key" in text or "permission" in text:
+        key = "auth"
+    elif "timeout" in text or "timed out" in text:
+        key = "timeout"
+    else:
+        key = "generic"
+
+    return FRIENDLY_ERRORS[key][lang]
+
 SUPPORTED_EXTENSIONS = {
     # Backend / general purpose
     ".py", ".js", ".ts", ".go", ".java", ".rb", ".php", ".cs", ".cpp", ".c", ".h", ".hpp",
@@ -95,7 +154,7 @@ async def generate(request: GenerateRequest, authorization: str = Header(...)):
         raise
     except Exception as e:
         print(f"[GENERATE ERROR] {request.doc_type} — {request.repo_full_name}: {e}")
-        raise HTTPException(status_code=500, detail=f"Errore nella generazione: {str(e)}")
+        raise HTTPException(status_code=500, detail=_friendly_error_message(e, request.lang or "it"))
 
 
 async def _generate_inner(request: GenerateRequest, user: dict, provider):
