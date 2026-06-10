@@ -3,12 +3,13 @@ import os
 
 _client: OpenAI | None = None
 
-# Limite token per chunk — oggi 8.000 (lascia margine sul limite Groq free di 12.000)
+# Limite Groq: 12.000 token/minuto, condivisi tra prompt + risposta + overhead
+# (template prompt, istruzioni lingua, file_tree). Teniamo un margine ampio.
 # Domani con Claude o Groq paid si può alzare a 50.000+
-CHUNK_TOKEN_LIMIT = 8000
-# Stima approssimativa: 1 token ≈ 4 caratteri
-CHARS_PER_TOKEN = 4
-CHUNK_SIZE_CHARS = CHUNK_TOKEN_LIMIT * CHARS_PER_TOKEN  # ~32.000 caratteri per chunk
+CHUNK_TOKEN_LIMIT = 6000
+# Stima conservativa per codice: 1 token ≈ 3 caratteri (codice è più "denso" di token del testo normale)
+CHARS_PER_TOKEN = 3
+CHUNK_SIZE_CHARS = CHUNK_TOKEN_LIMIT * CHARS_PER_TOKEN  # ~18.000 caratteri per chunk
 
 PROMPTS = {
     "readme": """Sei un esperto di documentazione tecnica. Analizza il seguente codice/struttura di un repository GitHub e genera un README.md completo e professionale.
@@ -459,7 +460,7 @@ def _generate_with_chunks(repo_name: str, file_tree: str, file_contents: str, do
             file_contents=chunk,
         )
         chunk_prompt = lang_instruction + "\n\n" + chunk_body + "\n\n" + lang_instruction
-        partial = _call_model(chunk_prompt, max_tokens=1024)
+        partial = _call_model(chunk_prompt, max_tokens=768)
         partial_docs.append(f"--- Chunk {i}/{total} ---\n{partial}")
         print(f"[CHUNKING] Chunk {i}/{total} completato")
 
@@ -472,4 +473,4 @@ def _generate_with_chunks(repo_name: str, file_tree: str, file_contents: str, do
     )
     merge_prompt = lang_instruction + "\n\n" + merge_body + "\n\n" + lang_instruction
 
-    return _call_model(merge_prompt, max_tokens=3000)
+    return _call_model(merge_prompt, max_tokens=2048)
