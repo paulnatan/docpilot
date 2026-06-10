@@ -3,13 +3,13 @@ import os
 
 _client: OpenAI | None = None
 
-# Limite Groq: 12.000 token/minuto, condivisi tra prompt + risposta + overhead
-# (template prompt, istruzioni lingua, file_tree). Teniamo un margine ampio.
-# Domani con Claude o Groq paid si può alzare a 50.000+
-CHUNK_TOKEN_LIMIT = 6000
-# Stima conservativa per codice: 1 token ≈ 3 caratteri (codice è più "denso" di token del testo normale)
-CHARS_PER_TOKEN = 3
-CHUNK_SIZE_CHARS = CHUNK_TOKEN_LIMIT * CHARS_PER_TOKEN  # ~18.000 caratteri per chunk
+# Gemini 2.0 Flash: contesto fino a ~1M token, limiti per-minuto molto più ampi
+# rispetto a Groq free tier. Manteniamo comunque il chunking come rete di
+# sicurezza per repository molto grandi, ma con soglie molto più alte.
+CHUNK_TOKEN_LIMIT = 100000
+# Stima conservativa: 1 token ≈ 4 caratteri
+CHARS_PER_TOKEN = 4
+CHUNK_SIZE_CHARS = CHUNK_TOKEN_LIMIT * CHARS_PER_TOKEN  # ~400.000 caratteri per chunk
 
 PROMPTS = {
     "readme": """Sei un esperto di documentazione tecnica. Analizza il seguente codice/struttura di un repository GitHub e genera un README.md completo e professionale.
@@ -399,23 +399,26 @@ Codice da commentare:
 }
 
 
+AI_MODEL = "gemini-2.5-flash"
+
+
 def get_client() -> OpenAI:
     global _client
     if _client is None:
-        api_key = os.getenv("GROQ_API_KEY")
+        api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
-            raise RuntimeError("GROQ_API_KEY mancante nel .env")
+            raise RuntimeError("GEMINI_API_KEY mancante nel .env")
         _client = OpenAI(
             api_key=api_key,
-            base_url="https://api.groq.com/openai/v1",
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
         )
     return _client
 
 
-def _call_model(prompt: str, max_tokens: int = 2048) -> str:
+def _call_model(prompt: str, max_tokens: int = 8000) -> str:
     client = get_client()
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model=AI_MODEL,
         max_tokens=max_tokens,
         messages=[{"role": "user", "content": prompt}],
     )
@@ -492,7 +495,7 @@ def _generate_with_chunks(repo_name: str, file_tree: str, file_contents: str, do
             file_contents=chunk,
         )
         chunk_prompt = lang_instruction + "\n\n" + chunk_body + "\n\n" + lang_instruction
-        partial = _call_model(chunk_prompt, max_tokens=768)
+        partial = _call_model(chunk_prompt, max_tokens=4000)
         partial_docs.append(f"--- Chunk {i}/{total} ---\n{partial}")
         print(f"[CHUNKING] Chunk {i}/{total} completato")
 
@@ -505,4 +508,4 @@ def _generate_with_chunks(repo_name: str, file_tree: str, file_contents: str, do
     )
     merge_prompt = lang_instruction + "\n\n" + merge_body + "\n\n" + lang_instruction
 
-    return _call_model(merge_prompt, max_tokens=2048)
+    return _call_model(merge_prompt, max_tokens=8000)
