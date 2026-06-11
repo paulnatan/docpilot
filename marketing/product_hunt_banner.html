@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1270px;
+      height: 760px;
+      background: #0d1117;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Background glow */
+    .bg-glow-1 {
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(63,185,80,0.12) 0%, transparent 70%);
+      top: -100px; left: -100px;
+    }
+    .bg-glow-2 {
+      position: absolute;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(88,166,255,0.10) 0%, transparent 70%);
+      bottom: -100px; right: 200px;
+    }
+    .bg-glow-3 {
+      position: absolute;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(188,140,255,0.08) 0%, transparent 70%);
+      top: 100px; right: -50px;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 80px;
+      padding: 0 80px;
+      width: 100%;
+    }
+
+    /* LEFT: text */
+    .left { flex: 1; }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo .r-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #3fb950, #58a6ff);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900; color: #fff;
+    }
+    .logo span { color: #3fb950; }
+
+    .tagline {
+      font-size: 13px;
+      font-weight: 700;
+      color: #3fb950;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 52px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+    h1 span {
+      background: linear-gradient(135deg, #3fb950, #58a6ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #8b949e;
+      line-height: 1.5;
+      margin-bottom: 36px;
+      max-width: 460px;
+    }
+
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      color: #c9d1d9;
+    }
+    .feature .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #3fb950;
+      flex-shrink: 0;
+    }
+
+    /* Supported languages strip */
+    .lang-title {
+      margin-top: 24px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #8b949e;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .lang-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-width: 480px;
+    }
+    .lang-pill {
+      font-size: 11px;
+      font-weight: 600;
+      color: #c9d1d9;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid #30363d;
+      border-radius: 100px;
+      padding: 4px 10px;
+      white-space: nowrap;
+    }
+
+    /* RIGHT: terminal mockup */
+    .right { flex-shrink: 0; }
+
+    .terminal {
+      width: 460px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .terminal-header {
+      background: #21262d;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #30363d;
+    }
+    .dot-red   { width:12px;height:12px;border-radius:50%;background:#ff5f57; }
+    .dot-yellow{ width:12px;height:12px;border-radius:50%;background:#ffbd2e; }
+    .dot-green { width:12px;height:12px;border-radius:50%;background:#28c840; }
+    .terminal-title {
+      margin-left: 8px;
+      font-size: 12px;
+      color: #8b949e;
+      font-family: 'SF Mono', monospace;
+    }
+
+    .terminal-body { padding: 20px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; }
+
+    .t-line { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; line-height: 1.4; }
+    .t-prompt { color: #3fb950; flex-shrink: 0; }
+    .t-cmd { color: #c9d1d9; }
+    .t-comment { color: #8b949e; }
+
+    .t-output { margin-bottom: 8px; }
+    .t-step { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; font-size: 12.5px; }
+    .t-check { color: #3fb950; }
+    .t-text { color: #c9d1d9; }
+
+    .t-divider { border: none; border-top: 1px solid #21262d; margin: 14px 0; }
+
+    .t-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-right: 6px;
+    }
+    .badge-green { background: rgba(63,185,80,0.15); color: #3fb950; border: 1px solid rgba(63,185,80,0.3); }
+    .badge-blue  { background: rgba(88,166,255,0.15); color: #58a6ff; border: 1px solid rgba(88,166,255,0.3); }
+    .badge-purple{ background: rgba(188,140,255,0.15); color: #bc8cff; border: 1px solid rgba(188,140,255,0.3); }
+
+    .t-success {
+      margin-top: 14px;
+      padding: 10px 14px;
+      background: rgba(63,185,80,0.08);
+      border: 1px solid rgba(63,185,80,0.25);
+      border-radius: 8px;
+      font-size: 12px;
+      color: #3fb950;
+    }
+
+    /* Bottom bar */
+    .bottom-bar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 56px;
+      background: rgba(22,27,34,0.9);
+      border-top: 1px solid #21262d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      z-index: 3;
+    }
+    .bottom-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #8b949e;
+    }
+    .bottom-item .icon { font-size: 16px; }
+    .bottom-item strong { color: #c9d1d9; }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+  <div class="bg-glow-3"></div>
+
+  <div class="wrapper">
+
+    <!-- LEFT -->
+    <div class="left">
+      <div class="logo">
+        <div class="r-icon">R</div>
+        Ready<span>Gen</span>
+      </div>
+
+      <div class="tagline">AI Documentation Generator</div>
+
+      <h1>Docs that<br/>write <span>themselves.</span></h1>
+
+      <p class="subtitle">
+        Connect your GitHub, GitLab or Bitbucket repo and get professional documentation in seconds — powered by AI.
+      </p>
+
+      <div class="features">
+        <div class="feature"><div class="dot"></div> README.md — complete and professional</div>
+        <div class="feature"><div class="dot"></div> API Docs — every endpoint documented</div>
+        <div class="feature"><div class="dot"></div> Changelog — generated from Git commits</div>
+        <div class="feature"><div class="dot"></div> OpenAPI 3.0 spec + JS/Python SDK</div>
+        <div class="feature"><div class="dot" style="background:#58a6ff"></div> Works with GitHub · GitLab · Bitbucket</div>
+      </div>
+
+      <div class="lang-title">30+ languages supported</div>
+      <div class="lang-list">
+        <span class="lang-pill">Python</span>
+        <span class="lang-pill">JavaScript</span>
+        <span class="lang-pill">TypeScript</span>
+        <span class="lang-pill">Go</span>
+        <span class="lang-pill">Java</span>
+        <span class="lang-pill">Ruby</span>
+        <span class="lang-pill">PHP</span>
+        <span class="lang-pill">C#</span>
+        <span class="lang-pill">C / C++</span>
+        <span class="lang-pill">Rust</span>
+        <span class="lang-pill">Dart</span>
+        <span class="lang-pill">Swift</span>
+        <span class="lang-pill">Kotlin</span>
+        <span class="lang-pill">Scala</span>
+        <span class="lang-pill">Elixir</span>
+        <span class="lang-pill">Lua</span>
+        <span class="lang-pill">R</span>
+        <span class="lang-pill">Perl</span>
+        <span class="lang-pill">Objective-C</span>
+        <span class="lang-pill">Vue</span>
+        <span class="lang-pill">HTML / CSS</span>
+        <span class="lang-pill">SCSS / SASS / LESS</span>
+        <span class="lang-pill">SQL</span>
+        <span class="lang-pill">Shell</span>
+        <span class="lang-pill">YAML / JSON / TOML</span>
+        <span class="lang-pill">+ more</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: Terminal -->
+    <div class="right">
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="dot-red"></div>
+          <div class="dot-yellow"></div>
+          <div class="dot-green"></div>
+          <span class="terminal-title">readygen — generating docs</span>
+        </div>
+        <div class="terminal-body">
+
+          <div class="t-line">
+            <span class="t-prompt">$</span>
+            <span class="t-cmd">readygen generate <span style="color:#58a6ff">my-api-project</span></span>
+          </div>
+          <div class="t-line" style="margin-bottom:14px">
+            <span class="t-prompt" style="color:#8b949e">#</span>
+            <span class="t-comment">Analyzing 47 files...</span>
+          </div>
+
+          <div class="t-output">
+            <div class="t-step"><span class="t-check">✓</span><span class="t-text">README.md generated</span><span class="t-badge badge-green">done</span></div>
+            <div class="t-step"><span class="t-check">✓</span><span class="t-text">API Docs created</span><span class="t-badge badge-green">done</span></div>
+            <div class="t-step"><span class="t-check">✓</span><span class="t-text">Changelog updated</span><span class="t-badge badge-green">done</span></div>
+            <div class="t-step"><span class="t-check">✓</span><span class="t-text">OpenAPI spec exported</span><span class="t-badge badge-blue">yaml</span></div>
+            <div class="t-step"><span class="t-check">✓</span><span class="t-text">SDK generated</span><span class="t-badge badge-purple">ts + py</span></div>
+            <div class="t-step"><span class="t-check">✓</span><span class="t-text">Pushed to repository</span><span class="t-badge badge-green">pushed</span></div>
+          </div>
+
+          <hr class="t-divider"/>
+
+          <div class="t-line">
+            <span class="t-prompt" style="color:#8b949e">#</span>
+            <span class="t-comment">Total time: 8.3 seconds</span>
+          </div>
+
+          <div class="t-success">
+            🚀 Documentation ready — 6 files generated and pushed
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="bottom-bar">
+    <div class="bottom-item"><span class="icon">⚡</span><span>Free plan available</span></div>
+    <div class="bottom-item"><span class="icon">🌍</span><span>5 languages supported</span></div>
+    <div class="bottom-item"><span class="icon">🔒</span><span>No credit card required</span></div>
+    <div class="bottom-item"><span class="icon">🔄</span><span>Auto-updates on every push</span></div>
+  </div>
+
+</body>
+</html>

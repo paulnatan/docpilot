@@ -178,9 +178,23 @@ Step 8: GitHub Marketplace + GitLab Marketplace
 ```
 
 **Materiali pronti** (in `marketing/`):
-- `launch_texts.md` — copy completo per Product Hunt, Reddit (r/webdev, r/SideProject, r/programming), LinkedIn, thread X/Twitter, calendario di lancio, lista screenshot, script video demo
-- `product_hunt_banner.html` — banner 1270x760px brandizzato ReadyGen
+- `launch_texts.md` — copy completo per Product Hunt, Reddit (r/webdev, r/SideProject, r/programming), LinkedIn, thread X/Twitter, calendario di lancio (date reali a partire dal 10/06), lista screenshot, script video demo — copy aggiornato a Gemini 2.5 Flash (rimossi riferimenti a Groq/LLaMA)
+- `product_hunt_banner.html` + `product_hunt_banner.png` — banner 1270x760px brandizzato ReadyGen, con sezione "30+ languages supported"
 - `video/demo_web.mp4` (2.3MB, 720p) e `video/demo_hd.mp4` (9.3MB, 1080p) — generati da `Video.mov` originale (352MB) via ffmpeg
+- `screenshots/` — 8 screenshot raw del prodotto live (hero, come funziona, funzionalità, dashboard, output README, pricing free/pro-team, login modal)
+- `gallery/` — le stesse 8 immagini ridimensionate a larghezza uniforme 1270px, pronte per la gallery Product Hunt (01_hero → 08_login)
+
+**Calendario di lancio aggiornato** (Product Hunt prima di tutto, LinkedIn per ultimo):
+| Data | Azione | Stato |
+|---|---|---|
+| Mer 10/06 | Screenshot + video demo — materiale pronto | ✅ Fatto |
+| Gio 11/06 | Finalizzare/sottomettere bozza listing Product Hunt | ✅ Fatto — lancio programmato (scheduled) per Mar 16/06 00:01 PT / 09:01 CEST |
+| Mar 16/06 00:01 PT (09:01 CEST) | 🚀 Lancio Product Hunt + thread X/Twitter + r/webdev | ⏳ Programmato, in attesa |
+| Mer 17/06 | Post r/programming | ⏳ Da fare |
+| Gio 18/06 | Post r/SideProject | ⏳ Da fare |
+| Ven 19/06 | Post LinkedIn (ultimo — recap risultati PH) | ⏳ Da fare |
+
+**Nota**: alla domanda "Vercel Day" durante la submission, scelto "No, but I still want to launch on June 16" (ReadyGen non usa stack Vercel).
 
 **Strategia post-lancio**: validare adozione utenti sul tier AI attuale (Gemini), poi valutare migrazione a Claude API quando i volumi lo giustificano. Dopo ReadyGen, l'obiettivo è "collezionare" più Micro SaaS.
 

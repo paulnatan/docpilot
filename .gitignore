@@ -12,3 +12,7 @@ frontend/node_modules
 # Sistema
 .DS_Store
 *.log
+
+# Materiali grezzi (troppo pesanti per il repo, non servono per il lancio)
+resource/
+marketing/video/demo_web_source_raw.mp4
