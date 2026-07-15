@@ -1,4 +1,4 @@
-const API = "https://docpilot-production-ff6b.up.railway.app";
+const API = "https://docpilot-4zg9.onrender.com";
 
 function getToken() {
   return localStorage.getItem("docpilot_token") || new URLSearchParams(location.search).get("token");
