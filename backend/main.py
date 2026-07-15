@@ -2,16 +2,37 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+import asyncio
+import httpx
 import os
 
 load_dotenv()
+
+async def _keepalive():
+    """Pinga il proprio /health ogni 10 minuti per evitare il cold start su Render free tier."""
+    await asyncio.sleep(60)
+    url = os.getenv("RENDER_EXTERNAL_URL", "http://localhost:8000") + "/health"
+    while True:
+        try:
+            async with httpx.AsyncClient() as client:
+                await client.get(url, timeout=10)
+        except Exception:
+            pass
+        await asyncio.sleep(600)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(_keepalive())
+    yield
+    task.cancel()
 
 from routes.auth import router as auth_router
 from routes.docs import router as docs_router
 from routes.payments import router as payments_router
 
-app = FastAPI(title="ReadyGen API", version="1.0.0")
+app = FastAPI(title="ReadyGen API", version="1.0.0", lifespan=lifespan)
 
 # CORS: in produzione usa FRONTEND_URL, in locale accetta tutto
 frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
