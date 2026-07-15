@@ -117,7 +117,6 @@ async def exchange_code_for_token(code: str) -> str:
                 "client_id": os.getenv("GITHUB_CLIENT_ID"),
                 "client_secret": os.getenv("GITHUB_CLIENT_SECRET"),
                 "code": code,
-                "redirect_uri": os.getenv("GITHUB_REDIRECT_URI"),
             },
         )
         data = response.json()
