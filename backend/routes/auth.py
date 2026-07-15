@@ -6,6 +6,9 @@ import os
 
 router = APIRouter()
 
+# Protezione doppia chiamata — codici già usati
+_used_codes: set = set()
+
 
 def create_session_token(user_id: str) -> str:
     return jwt.encode(
@@ -36,6 +39,10 @@ def login_github():
 @router.get("/callback")
 async def callback_github(code: str):
     from services.git.github import exchange_code_for_token, get_user_profile
+    if code in _used_codes:
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        return RedirectResponse(f"{frontend_url}/index.html?error=already_used")
+    _used_codes.add(code)
     try:
         access_token = await exchange_code_for_token(code)
         profile = await get_user_profile(access_token)
