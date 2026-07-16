@@ -44,8 +44,11 @@ async def callback_github(code: str):
         return RedirectResponse(f"{frontend_url}/index.html?error=already_used")
     _used_codes.add(code)
     try:
+        print(f"[AUTH] Scambio codice GitHub...")
         access_token = await exchange_code_for_token(code)
+        print(f"[AUTH] Token ottenuto OK")
         profile = await get_user_profile(access_token)
+        print(f"[AUTH] Profilo ottenuto: {profile.get('login')}")
 
         user_data = {
             "github_id": profile["id"],
@@ -55,13 +58,16 @@ async def callback_github(code: str):
             "access_token": access_token,
             "provider": "github",
         }
+        print(f"[AUTH] Upsert su Supabase...")
         user = upsert_user(user_data)
+        print(f"[AUTH] Upsert OK: {user.get('id')}")
 
         session_token = create_session_token(str(user["id"]))
         frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
         return RedirectResponse(f"{frontend_url}/dashboard.html?token={session_token}")
 
     except Exception as e:
+        print(f"[AUTH ERROR] {type(e).__name__}: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
 
