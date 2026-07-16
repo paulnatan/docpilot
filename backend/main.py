@@ -8,7 +8,8 @@ import asyncio
 import httpx
 import os
 
-load_dotenv()
+load_dotenv("/etc/secrets/.env", override=True)
+load_dotenv(override=False)
 
 async def _keepalive():
     """Pinga il proprio /health ogni 10 minuti per evitare il cold start su Render free tier."""
