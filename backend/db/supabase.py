@@ -11,9 +11,13 @@ def get_client() -> Client:
     global _client
     if _client is None:
         url = os.getenv("SUPABASE_URL")
-        key = os.getenv("SUPABASE_ANON_KEY")
+        key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+        if not key:
+            k1 = os.getenv("SUPA_KEY_1", "")
+            k2 = os.getenv("SUPA_KEY_2", "")
+            key = (k1 + k2) or None
         if not url or not key:
-            raise RuntimeError("SUPABASE_URL e SUPABASE_ANON_KEY mancanti nel .env")
+            raise RuntimeError("SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY mancanti nel .env")
         _client = create_client(url, key)
     return _client
 
