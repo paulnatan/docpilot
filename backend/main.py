@@ -101,19 +101,23 @@ def health():
 def debug_env():
     key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
     url = os.getenv("SUPABASE_URL", "")
+    secret_key = os.getenv("SUPABASE_SECRET_KEY", "")
+    legacy_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    active_key = secret_key or legacy_key
     test_result = "non testato"
     try:
         from supabase import create_client
-        client = create_client(url, key)
+        client = create_client(url, active_key)
         result = client.table("users").select("id").limit(1).execute()
         test_result = f"OK - {len(result.data)} righe"
     except Exception as e:
         test_result = f"ERRORE: {str(e)}"
     return {
         "supabase_url": url or "MANCANTE",
-        "key_length": len(key),
-        "key_start": key[:20] if key else "MANCANTE",
-        "key_end": key[-10:] if key else "MANCANTE",
+        "secret_key_length": len(secret_key),
+        "legacy_key_length": len(legacy_key),
+        "active_key_type": "secret" if secret_key else "legacy",
+        "active_key_start": active_key[:15] if active_key else "MANCANTE",
         "frontend_url": os.getenv("FRONTEND_URL", "MANCANTE"),
         "supabase_test": test_result,
     }

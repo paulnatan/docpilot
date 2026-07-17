@@ -1,5 +1,6 @@
 from supabase import create_client, Client
 from dotenv import load_dotenv
+import httpx
 import os
 
 load_dotenv()
@@ -7,17 +8,21 @@ load_dotenv()
 _client: Client | None = None
 
 
+def _get_key() -> str:
+    """Prova prima la nuova secret key, poi la legacy service_role key."""
+    return (
+        os.getenv("SUPABASE_SECRET_KEY") or
+        os.getenv("SUPABASE_SERVICE_ROLE_KEY") or ""
+    )
+
+
 def get_client() -> Client:
     global _client
     if _client is None:
         url = os.getenv("SUPABASE_URL")
-        key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-        if not key:
-            k1 = os.getenv("SUPA_KEY_1", "")
-            k2 = os.getenv("SUPA_KEY_2", "")
-            key = (k1 + k2) or None
+        key = _get_key()
         if not url or not key:
-            raise RuntimeError("SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY mancanti nel .env")
+            raise RuntimeError("SUPABASE_URL e chiave Supabase mancanti")
         _client = create_client(url, key)
     return _client
 
