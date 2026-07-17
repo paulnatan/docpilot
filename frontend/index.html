@@ -730,6 +730,7 @@
   <ul class="nav-links" id="nav-links">
     <li><a href="#come-funziona" id="nav-how">Come funziona</a></li>
     <li><a href="#features" id="nav-features">Funzionalità</a></li>
+    <li><a href="#prezzi" id="nav-pricing">Prezzi</a></li>
     <li>
       <div style="position:relative; display:inline-block;" id="lang-selector-wrap">
         <button id="lang-btn" onclick="toggleLangMenu()" style="display:flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--border2);border-radius:6px;padding:6px 12px;color:var(--text);font-size:13px;cursor:pointer;">🇮🇹 IT ▾</button>
@@ -990,10 +991,11 @@
       <p class="section-sub" id="pricing-sub" style="margin: 0 auto;">Inizia. Scala quando sei pronto.</p>
     </div>
 
-    <!-- Free card -->
-    <div class="pricing-grid reveal" style="grid-template-columns: 1fr; max-width: 340px; margin: 0 auto 48px;">
+    <div class="pricing-grid reveal">
+      <!-- Free -->
       <div class="pricing-card">
         <div class="pricing-plan">Free</div>
+        <div class="pricing-price">€0<sup></sup></div>
         <div class="pricing-period">per sempre</div>
         <ul class="pricing-features">
           <li>1 repository</li>
@@ -1001,9 +1003,44 @@
           <li>Changelog base</li>
           <li>Storico 7 giorni</li>
         </ul>
+        <a href="#" class="pricing-btn pricing-btn-outline" onclick="openProviderModal(event)" id="pricing-free-btn">Inizia gratis</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Più popolare</div>
+        <img src="images/AbbonamentoSingoloSito.png" alt="Pro" style="width:100%;border-radius:10px;margin-bottom:16px;"/>
+        <div class="pricing-plan">Pro</div>
+        <div class="pricing-price">€19<sup>/mo</sup></div>
+        <div class="pricing-period">fatturato mensilmente</div>
+        <ul class="pricing-features">
+          <li>Repository illimitati</li>
+          <li>README + API Docs + Changelog</li>
+          <li>Commenti inline AI</li>
+          <li>Push automatico nel repo</li>
+          <li>Storico illimitato</li>
+          <li>5 lingue (IT, EN, ES, FR, DE)</li>
+        </ul>
+        <a href="#" class="pricing-btn pricing-btn-green" onclick="handleCheckout('pro', event)" id="pricing-pro-btn">Passa a Pro</a>
+      </div>
+
+      <!-- Team -->
+      <div class="pricing-card">
+        <img src="images/AbbonamentoTeamSito.png" alt="Team" style="width:100%;border-radius:10px;margin-bottom:16px;"/>
+        <div class="pricing-plan">Team</div>
+        <div class="pricing-price">€49<sup>/mo</sup></div>
+        <div class="pricing-period">fatturato mensilmente</div>
+        <ul class="pricing-features">
+          <li>Tutto di Pro</li>
+          <li>Multi utente</li>
+          <li>Dashboard condivisa</li>
+          <li>Priorità nelle generazioni</li>
+          <li>SLA garantito</li>
+          <li>Supporto dedicato</li>
+        </ul>
+        <a href="#" class="pricing-btn pricing-btn-green" onclick="handleCheckout('team', event)" id="pricing-team-btn">Passa a Team</a>
       </div>
     </div>
-
 
     <div class="reveal" style="margin-top:32px; max-width:640px; margin-left:auto; margin-right:auto;">
       <p id="pricing-beta-note" style="font-size:13px; color: var(--text-muted); background: rgba(88,166,255,0.08); border:1px solid rgba(88,166,255,0.2); border-radius:10px; padding:12px 16px;">ℹ️ In questa fase beta, ReadyGen analizza fino a 60 file per repository (selezionati per rilevanza). Repo più grandi sono supportati in modo prioritario man mano che la piattaforma cresce.</p>
