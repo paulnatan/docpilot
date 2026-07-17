@@ -39,6 +39,8 @@ app = FastAPI(title="ReadyGen API", version="1.0.0", lifespan=lifespan)
 frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
 origins = [
     frontend_url,
+    "https://readygen.eu",
+    "https://www.readygen.eu",
     "https://readygen-app.netlify.app",
     "https://docpilot-app.netlify.app",
     "https://splendorous-chebakia-31f7c6.netlify.app",
