@@ -100,10 +100,20 @@ def health():
 @app.get("/debug-env")
 def debug_env():
     key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    url = os.getenv("SUPABASE_URL", "")
+    test_result = "non testato"
+    try:
+        from supabase import create_client
+        client = create_client(url, key)
+        result = client.table("users").select("id").limit(1).execute()
+        test_result = f"OK - {len(result.data)} righe"
+    except Exception as e:
+        test_result = f"ERRORE: {str(e)}"
     return {
-        "supabase_url": os.getenv("SUPABASE_URL", "MANCANTE"),
+        "supabase_url": url or "MANCANTE",
         "key_length": len(key),
         "key_start": key[:20] if key else "MANCANTE",
         "key_end": key[-10:] if key else "MANCANTE",
         "frontend_url": os.getenv("FRONTEND_URL", "MANCANTE"),
+        "supabase_test": test_result,
     }
