@@ -96,3 +96,14 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/debug-env")
+def debug_env():
+    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    return {
+        "supabase_url": os.getenv("SUPABASE_URL", "MANCANTE"),
+        "key_length": len(key),
+        "key_start": key[:20] if key else "MANCANTE",
+        "key_end": key[-10:] if key else "MANCANTE",
+        "frontend_url": os.getenv("FRONTEND_URL", "MANCANTE"),
+    }
