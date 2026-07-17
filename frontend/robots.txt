@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /dashboard.html
 
-Sitemap: https://readygen-app.netlify.app/sitemap.xml
+Sitemap: https://readygen.eu/sitemap.xml
